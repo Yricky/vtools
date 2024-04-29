@@ -25,8 +25,8 @@ import com.omarea.store.SpfConfig
 import com.omarea.ui.AdapterCpuCores
 import com.omarea.utils.AccessibleServiceHelper
 import com.omarea.vtools.R
+import com.omarea.vtools.databinding.FragmentHomeBinding
 import com.omarea.vtools.dialogs.DialogElectricityUnit
-import kotlinx.android.synthetic.main.fragment_home.*
 import kotlinx.coroutines.*
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -35,10 +35,13 @@ import kotlin.collections.HashMap
 
 class FragmentHome : androidx.fragment.app.Fragment() {
     private val modeSwitcher = ModeSwitcher()
+    private lateinit var binding:FragmentHomeBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.fragment_home, container, false)
+                              savedInstanceState: Bundle?): View {
+        return FragmentHomeBinding.inflate(inflater, container, false).also {
+            binding = it
+        }.root
     }
 
     private var CpuFrequencyUtil = CpuFrequencyUtils()
@@ -72,36 +75,36 @@ class FragmentHome : androidx.fragment.app.Fragment() {
 
         globalSPF = context!!.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
 
-        btn_powersave.setOnClickListener {
+        binding.btnPowersave.setOnClickListener {
             installConfig(ModeSwitcher.POWERSAVE)
         }
-        btn_defaultmode.setOnClickListener {
+        binding.btnDefaultmode.setOnClickListener {
             installConfig(ModeSwitcher.BALANCE)
         }
-        btn_gamemode.setOnClickListener {
+        binding.btnGamemode.setOnClickListener {
             installConfig(ModeSwitcher.PERFORMANCE)
         }
-        btn_fastmode.setOnClickListener {
+        binding.btnFastmode.setOnClickListener {
             installConfig(ModeSwitcher.FAST)
         }
 
         if (!GlobalStatus.homeMessage.isNullOrEmpty()) {
-            home_message.visibility = View.VISIBLE
-            home_message.text = GlobalStatus.homeMessage
+            binding.homeMessage.visibility = View.VISIBLE
+            binding.homeMessage.text = GlobalStatus.homeMessage
         }
 
         spf = context!!.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
 
-        home_clear_ram.setOnClickListener {
-            home_raminfo_text.text = getString(R.string.please_wait)
+        binding.homeClearRam.setOnClickListener {
+            binding.homeRaminfoText.text = getString(R.string.please_wait)
             GlobalScope.launch(Dispatchers.Main) {
                 dropCaches()
                 Scene.toast("缓存已清理...", Toast.LENGTH_SHORT)
             }
         }
 
-        home_clear_swap.setOnClickListener {
-            home_zramsize_text.text = getText(R.string.please_wait)
+        binding.homeClearSwap.setOnClickListener {
+            binding.homeZramsizeText.text = getText(R.string.please_wait)
             GlobalScope.launch(Dispatchers.Main) {
                 Scene.toast("开始回收少量内存(长按回收更多~)", Toast.LENGTH_SHORT)
                 val result = forceKSWAPD(1)
@@ -109,8 +112,8 @@ class FragmentHome : androidx.fragment.app.Fragment() {
             }
         }
 
-        home_clear_swap.setOnLongClickListener {
-            home_zramsize_text.text = getText(R.string.please_wait)
+        binding.homeClearSwap.setOnLongClickListener {
+            binding.homeZramsizeText.text = getText(R.string.please_wait)
             GlobalScope.launch(Dispatchers.Main) {
                 val result = forceKSWAPD(2)
                 Scene.toast(result, Toast.LENGTH_SHORT)
@@ -118,7 +121,7 @@ class FragmentHome : androidx.fragment.app.Fragment() {
             true
         }
 
-        home_help.setOnClickListener {
+        binding.homeHelp.setOnClickListener {
             try {
                 val uri = Uri.parse("http://vtools.omarea.com/")
                 val intent = Intent(Intent.ACTION_VIEW, uri)
@@ -128,12 +131,12 @@ class FragmentHome : androidx.fragment.app.Fragment() {
             }
         }
 
-        home_battery_edit.setOnClickListener {
+        binding.homeBatteryEdit.setOnClickListener {
             DialogElectricityUnit().showDialog(context!!)
         }
 
         // 点击CPU核心 查看详细参数
-        cpu_core_list.setOnItemClickListener { _, _, position, _ ->
+        binding.cpuCoreList.setOnItemClickListener { _, _, position, _ ->
             CpuFrequencyUtil.getCoregGovernorParams(position)?.run {
                 val msg = StringBuilder()
                 for (param in this) {
@@ -147,7 +150,7 @@ class FragmentHome : androidx.fragment.app.Fragment() {
             }
         }
 
-        home_device_name.text = when (Build.VERSION.SDK_INT) {
+        binding.homeDeviceName.text = when (Build.VERSION.SDK_INT) {
             31 -> "Android 12"
             30 -> "Android 11"
             29 -> "Android 10"
@@ -172,9 +175,9 @@ class FragmentHome : androidx.fragment.app.Fragment() {
         activity!!.title = getString(R.string.app_name)
 
         if (globalSPF.getBoolean(SpfConfig.HOME_QUICK_SWITCH, true) && (CpuConfigInstaller().dynamicSupport(Scene.context) || modeSwitcher.modeConfigCompleted())) {
-            powermode_toggles.visibility = View.VISIBLE
+            binding.powermodeToggles.visibility = View.VISIBLE
         } else {
-            powermode_toggles.visibility = View.GONE
+            binding.powermodeToggles.visibility = View.GONE
         }
 
         setModeState()
@@ -226,10 +229,10 @@ class FragmentHome : androidx.fragment.app.Fragment() {
             }
 
             myHandler.post {
-                home_raminfo_text?.text = "${((totalMem - availMem) * 100 / totalMem)}% (${totalMem / 1024 + 1}GB)"
-                home_raminfo?.setData(totalMem.toFloat(), availMem.toFloat())
-                home_swapstate_chat?.setData(swapTotal.toFloat(), (swapTotal - swaoUse).toFloat())
-                home_zramsize_text?.text = (
+                binding.homeRaminfoText.text = "${((totalMem - availMem) * 100 / totalMem)}% (${totalMem / 1024 + 1}GB)"
+                binding.homeRaminfo.setData(totalMem.toFloat(), availMem.toFloat())
+                binding.homeSwapstateChat?.setData(swapTotal.toFloat(), (swapTotal - swaoUse).toFloat())
+                binding.homeZramsizeText.text = (
                         if (swapTotal > 99) {
                             "${(swaoUse * 100.0 / swapTotal).toInt()}% (${format1(swapTotal / 1024.0)}GB)"
                         } else {
@@ -264,7 +267,7 @@ class FragmentHome : androidx.fragment.app.Fragment() {
             coreCount = CpuFrequencyUtil.getCoreCount()
             myHandler.post {
                 try {
-                    cpu_core_count.text = "$coreCount 核心"
+                    binding.cpuCoreCount.text = "$coreCount 核心"
                 } catch (ex: Exception) {
                 }
             }
@@ -307,33 +310,33 @@ class FragmentHome : androidx.fragment.app.Fragment() {
 
         myHandler.post {
             try {
-                home_swap_cached.text = "" + (memInfo.swapCached / 1024) + "MB"
-                home_buffers.text = "" + (memInfo.buffers / 1024) + "MB"
-                home_dirty.text = "" + (memInfo.dirty / 1024) + "MB"
+                binding.homeSwapCached.text = "" + (memInfo.swapCached / 1024) + "MB"
+                binding.homeBuffers.text = "" + (memInfo.buffers / 1024) + "MB"
+                binding.homeDirty.text = "" + (memInfo.dirty / 1024) + "MB"
 
-                home_running_time.text = elapsedRealtimeStr()
+                binding.homeRunningTime.text = elapsedRealtimeStr()
                 if (batteryCurrentNow != Long.MIN_VALUE && batteryCurrentNow != Long.MAX_VALUE) {
-                    home_battery_now.text = (batteryCurrentNow / globalSPF.getInt(SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT, SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT_DEFAULT)).toString() + "mA"
+                    binding.homeBatteryNow.text = (batteryCurrentNow / globalSPF.getInt(SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT, SpfConfig.GLOBAL_SPF_CURRENT_NOW_UNIT_DEFAULT)).toString() + "mA"
                 } else {
-                    home_battery_now.text = "--"
+                    binding.homeBatteryNow.text = "--"
                 }
-                home_battery_capacity.text = "$batteryCapacity%"
-                home_battery_temperature.text = "${temperature}°C"
+                binding.homeBatteryCapacity.text = "$batteryCapacity%"
+                binding.homeBatteryTemperature.text = "${temperature}°C"
 
-                home_gpu_freq.text = gpuFreq
-                home_gpu_load.text = "负载：$gpuLoad%"
+                binding.homeGpuFreq.text = gpuFreq
+                binding.homeGpuLoad.text = "负载：$gpuLoad%"
                 if (gpuLoad > -1) {
-                    home_gpu_chat.setData(100.toFloat(), (100 - gpuLoad).toFloat())
+                    binding.homeGpuChat.setData(100.toFloat(), (100 - gpuLoad).toFloat())
                 }
                 if (loads.containsKey(-1)) {
-                    cpu_core_total_load.text = "负载：" + loads[-1]!!.toInt().toString() + "%"
-                    home_cpu_chat.setData(100.toFloat(), (100 - loads[-1]!!.toInt()).toFloat())
+                    binding.cpuCoreTotalLoad.text = "负载：" + loads[-1]!!.toInt().toString() + "%"
+                    binding.homeCpuChat.setData(100.toFloat(), (100 - loads[-1]!!.toInt()).toFloat())
                 }
-                if (cpu_core_list.adapter == null) {
-                    val layoutParams = cpu_core_list.layoutParams
+                if (binding.cpuCoreList.adapter == null) {
+                    val layoutParams = binding.cpuCoreList.layoutParams
                     if (cores.size < 6) {
                         layoutParams.height = dp2px(105 * 2F)
-                        cpu_core_list.numColumns = 2
+                        binding.cpuCoreList.numColumns = 2
                     } else if (cores.size > 12) {
                         layoutParams.height = dp2px(105 * 4F)
                     } else if (cores.size > 8) {
@@ -341,10 +344,10 @@ class FragmentHome : androidx.fragment.app.Fragment() {
                     } else {
                         layoutParams.height = dp2px(105 * 2F)
                     }
-                    cpu_core_list.layoutParams = layoutParams
-                    cpu_core_list.adapter = AdapterCpuCores(context!!, cores)
+                    binding.cpuCoreList.layoutParams = layoutParams
+                    binding.cpuCoreList.adapter = AdapterCpuCores(context!!, cores)
                 } else {
-                    (cpu_core_list.adapter as AdapterCpuCores).setData(cores)
+                    (binding.cpuCoreList.adapter as AdapterCpuCores).setData(cores)
                 }
 
             } catch (ex: Exception) {
@@ -360,22 +363,22 @@ class FragmentHome : androidx.fragment.app.Fragment() {
     }
 
     private fun setModeState() {
-        btn_powersave.alpha = 0.4f
-        btn_defaultmode.alpha = 0.4f
-        btn_gamemode.alpha = 0.4f
-        btn_fastmode.alpha = 0.4f
+        binding.btnPowersave.alpha = 0.4f
+        binding.btnDefaultmode.alpha = 0.4f
+        binding.btnGamemode.alpha = 0.4f
+        binding.btnFastmode.alpha = 0.4f
         when (ModeSwitcher.getCurrentPowerMode()) {
             ModeSwitcher.BALANCE -> {
-                btn_defaultmode.alpha = 1f
+                binding.btnDefaultmode.alpha = 1f
             }
             ModeSwitcher.PERFORMANCE -> {
-                btn_gamemode.alpha = 1f
+                binding.btnGamemode.alpha = 1f
             }
             ModeSwitcher.POWERSAVE -> {
-                btn_powersave.alpha = 1f
+                binding.btnPowersave.alpha = 1f
             }
             ModeSwitcher.FAST -> {
-                btn_fastmode.alpha = 1f
+                binding.btnFastmode.alpha = 1f
             }
         }
     }

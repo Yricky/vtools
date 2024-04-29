@@ -10,7 +10,7 @@ import com.omarea.data.EventType
 import com.omarea.model.TaskAction
 import com.omarea.model.TriggerInfo
 import com.omarea.vtools.R
-import kotlinx.android.synthetic.main.list_scene_task_item.view.*
+import com.omarea.vtools.databinding.ListSceneTriggerItemBinding
 
 class SceneTriggerItem : LinearLayout {
     constructor(context: Context) : super(context) {
@@ -31,9 +31,9 @@ class SceneTriggerItem : LinearLayout {
 
     private fun setLayout(context: Context, triggerInfo: TriggerInfo) {
         setLayout(context)
-
-        system_scene_task_time.text = getEvents(triggerInfo)
-        system_scene_task_content.text = getTaskContentText(triggerInfo)
+        val binding = ListSceneTriggerItemBinding.bind(this)
+        binding.systemSceneTaskTime.text = getEvents(triggerInfo)
+        binding.systemSceneTaskContent.text = getTaskContentText(triggerInfo)
     }
 
     private fun getEvents(triggerInfo: TriggerInfo): String {

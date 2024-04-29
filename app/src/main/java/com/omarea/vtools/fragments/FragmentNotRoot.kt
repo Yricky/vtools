@@ -4,10 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import com.omarea.permissions.CheckRootStatus
 import com.omarea.vtools.R
-import kotlinx.android.synthetic.main.fragment_not_root.*
-
 
 class FragmentNotRoot : androidx.fragment.app.Fragment() {
 
@@ -16,7 +15,7 @@ class FragmentNotRoot : androidx.fragment.app.Fragment() {
             inflater.inflate(R.layout.fragment_not_root, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        btn_retry.setOnClickListener {
+        view.findViewById<Button>(R.id.btn_retry).setOnClickListener {
             CheckRootStatus(this.context!!, Runnable {
                 if (this.activity != null) {
                     this.activity!!.recreate()

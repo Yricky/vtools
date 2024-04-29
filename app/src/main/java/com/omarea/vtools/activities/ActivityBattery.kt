@@ -23,15 +23,17 @@ import com.omarea.library.device.BatteryCapacity
 import com.omarea.library.shell.BatteryUtils
 import com.omarea.store.SpfConfig
 import com.omarea.vtools.R
+import com.omarea.vtools.databinding.ActivityBatteryBinding
 import com.omarea.vtools.dialogs.DialogNumberInput
-import kotlinx.android.synthetic.main.activity_battery.*
 import java.util.*
 
 
 class ActivityBattery : ActivityBase() {
+    private lateinit var binding:ActivityBatteryBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_battery)
+        binding = ActivityBatteryBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         setBackArrow()
 
@@ -40,7 +42,7 @@ class ActivityBattery : ActivityBase() {
 
     private fun onViewCreated() {
 
-        battery_exec_options.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        binding.batteryExecOptions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onNothingSelected(parent: AdapterView<*>?) {
             }
 
@@ -66,7 +68,7 @@ class ActivityBattery : ActivityBase() {
         qcSettingSuupport = batteryUtils.qcSettingSupport()
         pdSettingSupport = batteryUtils.pdSupported()
 
-        settings_qc.setOnClickListener {
+        binding.settingsQc.setOnClickListener {
             val checked = (it as CompoundButton).isChecked
             spf.edit().putBoolean(SpfConfig.CHARGE_SPF_QC_BOOSTER, checked).apply()
             if (checked) {
@@ -76,17 +78,17 @@ class ActivityBattery : ActivityBase() {
                 Scene.toast(R.string.battery_qc_rehoot_desc, Toast.LENGTH_LONG)
             }
         }
-        settings_qc.setOnCheckedChangeListener { _, isChecked ->
-            battery_charge_speed_ext.visibility = if (isChecked) View.VISIBLE else View.GONE
+        binding.settingsQc.setOnCheckedChangeListener { _, isChecked ->
+            binding.batteryChargeSpeedExt.visibility = if (isChecked) View.VISIBLE else View.GONE
             if (!isChecked) {
-                battery_night_mode.isChecked = false
+                binding.batteryNightMode.isChecked = false
                 spf.edit().putBoolean(SpfConfig.CHARGE_SPF_NIGHT_MODE, false).apply()
             }
         }
-        settings_bp.setOnClickListener {
-            spf.edit().putBoolean(SpfConfig.CHARGE_SPF_BP, settings_bp.isChecked).apply()
+        binding.settingsBp.setOnClickListener {
+            spf.edit().putBoolean(SpfConfig.CHARGE_SPF_BP, binding.settingsBp.isChecked).apply()
             //禁用电池保护：恢复充电功能
-            if (!settings_bp.isChecked) {
+            if (!binding.settingsBp.isChecked) {
                 KeepShellPublic.doCmdSync(ResumeCharge)
             } else {
                 notifyConfigChanged()
@@ -94,56 +96,56 @@ class ActivityBattery : ActivityBase() {
             }
         }
 
-        settings_bp_level.setOnSeekBarChangeListener(OnSeekBarChangeListener(Runnable {
+        binding.settingsBpLevel.setOnSeekBarChangeListener(OnSeekBarChangeListener(Runnable {
             notifyConfigChanged()
-        }, spf, battery_bp_level_desc))
-        settings_qc_limit.setOnSeekBarChangeListener(OnSeekBarChangeListener2(Runnable {
+        }, spf, binding.batteryBpLevelDesc))
+        binding.settingsQcLimit.setOnSeekBarChangeListener(OnSeekBarChangeListener2(Runnable {
             val level = spf.getInt(SpfConfig.CHARGE_SPF_QC_LIMIT, SpfConfig.CHARGE_SPF_QC_LIMIT_DEFAULT)
             if (spf.getBoolean(SpfConfig.CHARGE_SPF_QC_BOOSTER, false)) {
                 batteryUtils.setChargeInputLimit(level, this)
             }
             notifyConfigChanged()
-        }, spf, settings_qc_limit_desc))
+        }, spf, binding.settingsQcLimitDesc))
 
         if (!qcSettingSuupport) {
-            settings_qc.isEnabled = false
+            binding.settingsQc.isEnabled = false
             spf.edit().putBoolean(SpfConfig.CHARGE_SPF_QC_BOOSTER, false).putBoolean(SpfConfig.CHARGE_SPF_NIGHT_MODE, false).apply()
-            settings_qc_limit.isEnabled = false
-            settings_qc_limit_current.visibility = View.GONE
+            binding.settingsQcLimit.isEnabled = false
+            binding.settingsQcLimitCurrent.visibility = View.GONE
         }
 
         if (!batteryUtils.bpSettingSupport()) {
-            settings_bp.isEnabled = false
+            binding.settingsBp.isEnabled = false
             spf.edit().putBoolean(SpfConfig.CHARGE_SPF_BP, false).apply()
 
-            bp_cardview.visibility = View.GONE
+            binding.bpCardview.visibility = View.GONE
         } else {
-            bp_cardview.visibility = View.VISIBLE
+            binding.bpCardview.visibility = View.VISIBLE
         }
 
         if (pdSettingSupport) {
-            settings_pd_support.visibility = View.VISIBLE
-            settings_pd.setOnClickListener {
+            binding.settingsPdSupport.visibility = View.VISIBLE
+            binding.settingsPd.setOnClickListener {
                 val isChecked = (it as CompoundButton).isChecked
                 batteryUtils.setAllowed(isChecked)
             }
-            settings_pd.isChecked = batteryUtils.pdAllowed()
-            settings_pd_state.text = if (batteryUtils.pdActive()) getString(R.string.battery_pd_active_1) else getString(R.string.battery_pd_active_0)
+            binding.settingsPd.isChecked = batteryUtils.pdAllowed()
+            binding.settingsPdState.text = if (batteryUtils.pdActive()) getString(R.string.battery_pd_active_1) else getString(R.string.battery_pd_active_0)
         } else {
-            settings_pd_support.visibility = View.GONE
+            binding.settingsPdSupport.visibility = View.GONE
         }
 
         if (batteryUtils.stepChargeSupport()) {
-            settings_step_charge.visibility = View.VISIBLE
-            settings_step_charge_enabled.setOnClickListener {
+            binding.settingsStepCharge.visibility = View.VISIBLE
+            binding.settingsStepChargeEnabled.setOnClickListener {
                 batteryUtils.setStepCharge((it as Checkable).isChecked)
             }
-            settings_step_charge_enabled.isChecked = batteryUtils.getStepCharge()
+            binding.settingsStepChargeEnabled.isChecked = batteryUtils.getStepCharge()
         } else {
-            settings_step_charge.visibility = View.GONE
+            binding.settingsStepCharge.visibility = View.GONE
         }
 
-        btn_battery_history.setOnClickListener {
+        binding.btnBatteryHistory.setOnClickListener {
             try {
                 val powerUsageIntent = Intent(Intent.ACTION_POWER_USAGE_SUMMARY)
                 val resolveInfo = packageManager.resolveActivity(powerUsageIntent, 0)
@@ -162,7 +164,7 @@ class ActivityBattery : ActivityBase() {
 
             }
         }
-        btn_battery_history_del.setOnClickListener {
+        binding.btnBatteryHistoryDel.setOnClickListener {
             DialogHelper.confirm(this,
                     "需要重启",
                     "删除电池使用记录需要立即重启手机，是否继续？",
@@ -180,36 +182,36 @@ class ActivityBattery : ActivityBase() {
                     })
         }
 
-        bp_disable_charge.setOnClickListener {
+        binding.bpDisableCharge.setOnClickListener {
             KeepShellPublic.doCmdSync("sh " + FileWrite.writePrivateShellFile("addin/disable_charge.sh", "addin/disable_charge.sh", this.context))
             Scene.toast(R.string.battery_charge_disabled, Toast.LENGTH_LONG)
         }
-        bp_enable_charge.setOnClickListener {
+        binding.bpEnableCharge.setOnClickListener {
             KeepShellPublic.doCmdSync(ResumeCharge)
             Scene.toast(R.string.battery_charge_resumed, Toast.LENGTH_LONG)
         }
 
-        battery_get_up.setText(minutes2Str(spf.getInt(SpfConfig.CHARGE_SPF_TIME_GET_UP, SpfConfig.CHARGE_SPF_TIME_GET_UP_DEFAULT)))
-        battery_get_up.setOnClickListener {
+        binding.batteryGetUp.setText(minutes2Str(spf.getInt(SpfConfig.CHARGE_SPF_TIME_GET_UP, SpfConfig.CHARGE_SPF_TIME_GET_UP_DEFAULT)))
+        binding.batteryGetUp.setOnClickListener {
             val nightModeGetUp = spf.getInt(SpfConfig.CHARGE_SPF_TIME_GET_UP, SpfConfig.CHARGE_SPF_TIME_GET_UP_DEFAULT)
             TimePickerDialog(this.context, TimePickerDialog.OnTimeSetListener { view, hourOfDay, minute ->
                 spf.edit().putInt(SpfConfig.CHARGE_SPF_TIME_GET_UP, hourOfDay * 60 + minute).apply()
-                battery_get_up.setText(String.format(getString(R.string.battery_night_mode_time), hourOfDay, minute))
+                binding.batteryGetUp.setText(String.format(getString(R.string.battery_night_mode_time), hourOfDay, minute))
                 notifyConfigChanged()
             }, nightModeGetUp / 60, nightModeGetUp % 60, true).show()
         }
 
-        battery_sleep.setText(minutes2Str(spf.getInt(SpfConfig.CHARGE_SPF_TIME_SLEEP, SpfConfig.CHARGE_SPF_TIME_SLEEP_DEFAULT)))
-        battery_sleep.setOnClickListener {
+        binding.batterySleep.setText(minutes2Str(spf.getInt(SpfConfig.CHARGE_SPF_TIME_SLEEP, SpfConfig.CHARGE_SPF_TIME_SLEEP_DEFAULT)))
+        binding.batterySleep.setOnClickListener {
             val nightModeSleep = spf.getInt(SpfConfig.CHARGE_SPF_TIME_SLEEP, SpfConfig.CHARGE_SPF_TIME_SLEEP_DEFAULT)
             TimePickerDialog(this.context, TimePickerDialog.OnTimeSetListener { _, hourOfDay, minute ->
                 spf.edit().putInt(SpfConfig.CHARGE_SPF_TIME_SLEEP, hourOfDay * 60 + minute).apply()
-                battery_sleep.setText(String.format(getString(R.string.battery_night_mode_time), hourOfDay, minute))
+                binding.batterySleep.setText(String.format(getString(R.string.battery_night_mode_time), hourOfDay, minute))
                 notifyConfigChanged()
             }, nightModeSleep / 60, nightModeSleep % 60, true).show()
         }
-        battery_night_mode.isChecked = spf.getBoolean(SpfConfig.CHARGE_SPF_NIGHT_MODE, false)
-        battery_night_mode.setOnClickListener {
+        binding.batteryNightMode.isChecked = spf.getBoolean(SpfConfig.CHARGE_SPF_NIGHT_MODE, false)
+        binding.batteryNightMode.setOnClickListener {
             val checked = (it as CompoundButton).isChecked
             if (checked && !spf.getBoolean(SpfConfig.CHARGE_SPF_QC_BOOSTER, false)) {
                 Toast.makeText(this.context, "需要开启 " + getString(R.string.battery_qc_charger), Toast.LENGTH_LONG).show()
@@ -242,14 +244,14 @@ class ActivityBattery : ActivityBase() {
 
         title = getString(R.string.menu_battery)
 
-        settings_qc.isChecked = spf.getBoolean(SpfConfig.CHARGE_SPF_QC_BOOSTER, false)
-        settings_bp.isChecked = spf.getBoolean(SpfConfig.CHARGE_SPF_BP, false)
+        binding.settingsQc.isChecked = spf.getBoolean(SpfConfig.CHARGE_SPF_QC_BOOSTER, false)
+        binding.settingsBp.isChecked = spf.getBoolean(SpfConfig.CHARGE_SPF_BP, false)
         val bpLevel = spf.getInt(SpfConfig.CHARGE_SPF_BP_LEVEL, SpfConfig.CHARGE_SPF_BP_LEVEL_DEFAULT)
-        settings_bp_level.progress = bpLevel - 30
-        battery_bp_level_desc.text = String.format(battery_bp_level_desc.context.getString(R.string.battery_bp_status), bpLevel, bpLevel - 20)
-        settings_qc_limit.progress = spf.getInt(SpfConfig.CHARGE_SPF_QC_LIMIT, SpfConfig.CHARGE_SPF_QC_LIMIT_DEFAULT) / 100
-        settings_qc_limit_desc.text = "" + spf.getInt(SpfConfig.CHARGE_SPF_QC_LIMIT, SpfConfig.CHARGE_SPF_QC_LIMIT_DEFAULT) + "mA"
-        battery_exec_options.setSelection(when (spf.getInt(SpfConfig.CHARGE_SPF_EXEC_MODE, SpfConfig.CHARGE_SPF_EXEC_MODE_DEFAULT)) {
+        binding.settingsBpLevel.progress = bpLevel - 30
+        binding.batteryBpLevelDesc.text = String.format(binding.batteryBpLevelDesc.context.getString(R.string.battery_bp_status), bpLevel, bpLevel - 20)
+        binding.settingsQcLimit.progress = spf.getInt(SpfConfig.CHARGE_SPF_QC_LIMIT, SpfConfig.CHARGE_SPF_QC_LIMIT_DEFAULT) / 100
+        binding.settingsQcLimitDesc.text = "" + spf.getInt(SpfConfig.CHARGE_SPF_QC_LIMIT, SpfConfig.CHARGE_SPF_QC_LIMIT_DEFAULT) + "mA"
+        binding.batteryExecOptions.setSelection(when (spf.getInt(SpfConfig.CHARGE_SPF_EXEC_MODE, SpfConfig.CHARGE_SPF_EXEC_MODE_DEFAULT)) {
             SpfConfig.CHARGE_SPF_EXEC_MODE_SPEED_DOWN -> 0
             SpfConfig.CHARGE_SPF_EXEC_MODE_SPEED_UP -> 1
             SpfConfig.CHARGE_SPF_EXEC_MODE_SPEED_FORCE -> 2
@@ -304,7 +306,7 @@ class ActivityBattery : ActivityBase() {
                 myHandler.post {
                     try {
                         if (qcSettingSuupport) {
-                            settings_qc_limit_current.text = getString(R.string.battery_reality_limit) + limit
+                            binding.settingsQcLimitCurrent.text = getString(R.string.battery_reality_limit) + limit
                         }
                         battrystatus.text = getString(R.string.battery_title) +
                                 batteryMAH +
@@ -314,25 +316,25 @@ class ActivityBattery : ActivityBase() {
                             val str = "" + kernelCapacity + "%"
                             val ss = SpannableString(str)
                             if (str.contains(".")) {
-                                val small = AbsoluteSizeSpan((battrystatus_level.textSize * 0.3).toInt(), false)
+                                val small = AbsoluteSizeSpan((binding.battrystatusLevel.textSize * 0.3).toInt(), false)
                                 ss.setSpan(small, str.indexOf("."), str.lastIndexOf("%"), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                                val medium = AbsoluteSizeSpan((battrystatus_level.textSize * 0.5).toInt(), false)
+                                val medium = AbsoluteSizeSpan((binding.battrystatusLevel.textSize * 0.5).toInt(), false)
                                 ss.setSpan(medium, str.indexOf("%"), str.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                             }
-                            battrystatus_level.text = ss
+                            binding.battrystatusLevel.text = ss
                         } else {
-                            battrystatus_level.text = "" + level + "%"
+                            binding.battrystatusLevel.text = "" + level + "%"
                         }
 
-                        battery_capacity_chart.setData(100f, 100f - level, temp.toFloat())
+                        binding.batteryCapacityChart.setData(100f, 100f - level, temp.toFloat())
 
-                        settings_qc.isChecked = spf.getBoolean(SpfConfig.CHARGE_SPF_QC_BOOSTER, false)
-                        battery_uevent.text = batteryInfo
-                        battery_usb_uevent.text = usbInfo
+                        binding.settingsQc.isChecked = spf.getBoolean(SpfConfig.CHARGE_SPF_QC_BOOSTER, false)
+                        binding.batteryUevent.text = batteryInfo
+                        binding.batteryUsbUevent.text = usbInfo
 
                         if (pdSettingSupport) {
-                            settings_pd.isChecked = pdAllowed
-                            settings_pd_state.text = if (pdActive) getString(R.string.battery_pd_active_1) else getString(R.string.battery_pd_active_0)
+                            binding.settingsPd.isChecked = pdAllowed
+                            binding.settingsPdState.text = if (pdActive) getString(R.string.battery_pd_active_1) else getString(R.string.battery_pd_active_0)
                         }
                     } catch (ex: java.lang.Exception) {
                     }
@@ -372,30 +374,30 @@ class ActivityBattery : ActivityBase() {
         val cpacity = batteryUtils.getCpacity()
         val chargeFull = batteryUtils.getChargeFull()
         if (cpacity > 0) {
-            battery_forgery_ratio.text = cpacity.toString() + "%"
-            battery_forgery_ratio.setOnClickListener {
+            binding.batteryForgeryRatio.text = cpacity.toString() + "%"
+            binding.batteryForgeryRatio.setOnClickListener {
                 batteryForgeryRatio()
             }
         } else {
-            battery_forgery_ratio.setOnClickListener {
+            binding.batteryForgeryRatio.setOnClickListener {
                 Toast.makeText(this, getString(R.string.device_unsupport), Toast.LENGTH_SHORT).show()
             }
         }
         if (chargeFull > 0) {
-            battery_forgery_full_now.text = chargeFull.toString() + "mAh"
-            battery_forgery_full_now.setOnClickListener {
+            binding.batteryForgeryFullNow.text = chargeFull.toString() + "mAh"
+            binding.batteryForgeryFullNow.setOnClickListener {
                 batteryForgeryChargeFull()
             }
         } else {
-            battery_forgery_full_now.setOnClickListener {
+            binding.batteryForgeryFullNow.setOnClickListener {
                 Toast.makeText(this, getString(R.string.device_unsupport), Toast.LENGTH_SHORT).show()
             }
         }
 
         if (cpacity < 1 && chargeFull < 1) {
-            battery_forgery.visibility = View.GONE
+            binding.batteryForgery.visibility = View.GONE
         } else {
-            battery_forgery.visibility = View.VISIBLE
+            binding.batteryForgery.visibility = View.VISIBLE
         }
     }
 
@@ -433,7 +435,7 @@ class ActivityBattery : ActivityBase() {
         }).start()
     }
 
-    class OnSeekBarChangeListener(private var next: Runnable, private var spf: SharedPreferences, private var battery_bp_level_desc: TextView) : SeekBar.OnSeekBarChangeListener {
+    class OnSeekBarChangeListener(private var next: Runnable, private var spf: SharedPreferences, private var batteryBpLevelDesc: TextView) : SeekBar.OnSeekBarChangeListener {
         override fun onStopTrackingTouch(seekBar: SeekBar?) {
             val progress = seekBar!!.progress + 30
             if (spf.getInt(SpfConfig.CHARGE_SPF_BP_LEVEL, Int.MIN_VALUE) == progress) {
@@ -447,11 +449,11 @@ class ActivityBattery : ActivityBase() {
         }
 
         override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-            battery_bp_level_desc.text = String.format(battery_bp_level_desc.context.getString(R.string.battery_bp_status), progress + 30, progress + 10)
+            batteryBpLevelDesc.text = String.format(batteryBpLevelDesc.context.getString(R.string.battery_bp_status), progress + 30, progress + 10)
         }
     }
 
-    class OnSeekBarChangeListener2(private var next: Runnable, private var spf: SharedPreferences, private var settings_qc_limit_desc: TextView) : SeekBar.OnSeekBarChangeListener {
+    class OnSeekBarChangeListener2(private var next: Runnable, private var spf: SharedPreferences, private var settingsQcLimitDesc: TextView) : SeekBar.OnSeekBarChangeListener {
         override fun onStopTrackingTouch(seekBar: SeekBar?) {
             val progress = seekBar!!.progress * 100
             if (spf.getInt(SpfConfig.CHARGE_SPF_QC_LIMIT, SpfConfig.CHARGE_SPF_QC_LIMIT_DEFAULT) == progress) {
@@ -466,7 +468,7 @@ class ActivityBattery : ActivityBase() {
         }
 
         override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-            settings_qc_limit_desc.text = "" + progress * 100 + "mA"
+            settingsQcLimitDesc.text = "" + progress * 100 + "mA"
         }
     }
 }

@@ -35,9 +35,10 @@ import com.omarea.ui.FreezeAppAdapter
 import com.omarea.ui.TabIconHelper
 import com.omarea.utils.AppListHelper
 import com.omarea.vtools.R
-import kotlinx.android.synthetic.main.activity_freeze_apps.*
+import com.omarea.vtools.databinding.ActivityFreezeAppsBinding
 
 class ActivityFreezeApps : ActivityBase() {
+    private lateinit var binding:ActivityFreezeAppsBinding
     private lateinit var processBarDialog: ProgressBarDialog
     private var freezeApps = java.util.ArrayList<String>()
     private var handler: Handler = Handler(Looper.getMainLooper())
@@ -47,7 +48,8 @@ class ActivityFreezeApps : ActivityBase() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_freeze_apps)
+        binding = ActivityFreezeAppsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         setBackArrow()
 
         onViewCreated()
@@ -88,7 +90,7 @@ class ActivityFreezeApps : ActivityBase() {
     }
 
     private fun onViewCreated() {
-        val tabHost = freeze_tabhost
+        val tabHost = binding.freezeTabhost
         tabHost.setup()
         val tabIconHelper = TabIconHelper(tabHost, this)
         tabIconHelper.newTabSpec("应用", getDrawable(R.drawable.tab_app)!!, R.id.tab_freeze_apps)
@@ -100,7 +102,7 @@ class ActivityFreezeApps : ActivityBase() {
         config = this.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
 
         useSuspendMode = config.getBoolean(SpfConfig.GLOBAL_SPF_FREEZE_SUSPEND, Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
-        freeze_suspend_mode.run {
+        binding.freezeSuspendMode.run {
             isEnabled = Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
             isChecked = useSuspendMode
             setOnClickListener {
@@ -110,11 +112,11 @@ class ActivityFreezeApps : ActivityBase() {
                 useSuspendMode = checked
                 config.edit().putBoolean(SpfConfig.GLOBAL_SPF_FREEZE_SUSPEND, useSuspendMode).apply()
 
-                freeze_any_unfreeze.isEnabled = checked
+                binding.freezeAnyUnfreeze.isEnabled = checked
             }
         }
 
-        freeze_any_unfreeze.run {
+        binding.freezeAnyUnfreeze.run {
             isEnabled = useSuspendMode
             isChecked = config.getBoolean(SpfConfig.GLOBAL_SPF_FREEZE_XPOSED_OPEN, false)
             setOnClickListener {
@@ -122,22 +124,22 @@ class ActivityFreezeApps : ActivityBase() {
             }
         }
 
-        freeze_click_open.isChecked = config.getBoolean(SpfConfig.GLOBAL_SPF_FREEZE_CLICK_OPEN, false)
-        freeze_click_open.setOnClickListener {
+        binding.freezeClickOpen.isChecked = config.getBoolean(SpfConfig.GLOBAL_SPF_FREEZE_CLICK_OPEN, false)
+        binding.freezeClickOpen.setOnClickListener {
             config.edit().putBoolean(SpfConfig.GLOBAL_SPF_FREEZE_CLICK_OPEN, (it as CompoundButton).isChecked).apply()
         }
 
-        freeze_shortcut_suggest.isChecked = config.getBoolean(SpfConfig.GLOBAL_SPF_FREEZE_ICON_NOTIFY, true)
-        freeze_shortcut_suggest.setOnClickListener {
+        binding.freezeShortcutSuggest.isChecked = config.getBoolean(SpfConfig.GLOBAL_SPF_FREEZE_ICON_NOTIFY, true)
+        binding.freezeShortcutSuggest.setOnClickListener {
             config.edit().putBoolean(SpfConfig.GLOBAL_SPF_FREEZE_ICON_NOTIFY, (it as CompoundButton).isChecked).apply()
         }
 
-        freeze_time_limit.run {
+        binding.freezeTimeLimit.run {
             progress = config.getInt(SpfConfig.GLOBAL_SPF_FREEZE_TIME_LIMIT, 2)
-            freeze_time_limit_text.text = progress.toString()
+            binding.freezeTimeLimitText.text = progress.toString()
             setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    freeze_time_limit_text.text = progress.toString()
+                    binding.freezeTimeLimitText.text = progress.toString()
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {
@@ -151,12 +153,12 @@ class ActivityFreezeApps : ActivityBase() {
             })
         }
 
-        freeze_item_limit.run {
+        binding.freezeItemLimit.run {
             progress = config.getInt(SpfConfig.GLOBAL_SPF_FREEZE_ITEM_LIMIT, 5)
-            freeze_item_limit_text.text = progress.toString()
+            binding.freezeItemLimitText.text = progress.toString()
             setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    freeze_item_limit_text.text = progress.toString()
+                    binding.freezeItemLimitText.text = progress.toString()
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {
@@ -170,12 +172,12 @@ class ActivityFreezeApps : ActivityBase() {
             })
         }
 
-        freeze_screen_delay.run {
+        binding.freezeScreenDelay.run {
             progress = config.getInt(SpfConfig.GLOBAL_SPF_FREEZE_DELAY, 0)
-            freeze_screen_delay_text.text = progress.toString()
+            binding.freezeScreenDelayText.text = progress.toString()
             setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
                 override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    freeze_screen_delay_text.text = progress.toString()
+                    binding.freezeScreenDelayText.text = progress.toString()
                 }
 
                 override fun onStartTrackingTouch(seekBar: SeekBar?) {
@@ -194,51 +196,51 @@ class ActivityFreezeApps : ActivityBase() {
         processBarDialog.showDialog()
 
         // 点击应用图标
-        freeze_apps.setOnItemClickListener { parent, itemView, position, _ ->
+        binding.freezeApps.setOnItemClickListener { parent, itemView, position, _ ->
             try {
                 val appInfo = (parent.adapter.getItem(position) as AppInfo)
                 if (config.getBoolean(SpfConfig.GLOBAL_SPF_FREEZE_CLICK_OPEN, false)) {
                     startApp(appInfo)
                 } else {
                     toggleEnable(appInfo)
-                    (freeze_apps.adapter as FreezeAppAdapter).updateRow(position, freeze_apps, appInfo)
+                    (binding.freezeApps.adapter as FreezeAppAdapter).updateRow(position, binding.freezeApps, appInfo)
                 }
             } catch (ex: Exception) {
             }
         }
 
         // 长按图标
-        freeze_apps.setOnItemLongClickListener { parent, itemView, position, _ ->
+        binding.freezeApps.setOnItemLongClickListener { parent, itemView, position, _ ->
             val item = (parent.adapter.getItem(position) as AppInfo)
             showOptions(item)
             true
         }
 
         // 浮动按钮
-        freeze_add.setOnClickListener {
+        binding.freezeAdd.setOnClickListener {
             addFreezeAppDialog()
         }
 
         // 菜单按钮
-        freeze_menu.setOnClickListener {
+        binding.freezeMenu.setOnClickListener {
             freezeOptionsDialog()
         }
 
         loadData()
 
-        freeze_apps_search.addTextChangedListener(object : TextWatcher {
+        binding.freezeAppsSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun afterTextChanged(s: Editable?) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                (freeze_apps.adapter as Filterable).getFilter().filter(if (s == null) "" else s.toString())
+                (binding.freezeApps.adapter as Filterable).getFilter().filter(if (s == null) "" else s.toString())
             }
         })
 
         val p = packageManager
         val startActivity = ComponentName(this.applicationContext, ActivityFreezeApps::class.java)
         val activityEnabled = p.getComponentEnabledSetting(startActivity) == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-        freeze_quick_entry.isChecked = activityEnabled
-        freeze_quick_entry.setOnClickListener {
+        binding.freezeQuickEntry.isChecked = activityEnabled
+        binding.freezeQuickEntry.setOnClickListener {
             try {
                 if ((it as CompoundButton).isChecked) {
                     p.setComponentEnabledSetting(startActivity, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP)
@@ -288,7 +290,7 @@ class ActivityFreezeApps : ActivityBase() {
 
                 handler.post {
                     try {
-                        freeze_apps.adapter = FreezeAppAdapter(this.applicationContext, freezeAppsInfo)
+                        binding.freezeApps.adapter = FreezeAppAdapter(this.applicationContext, freezeAppsInfo)
                         processBarDialog.hideDialog()
 
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) { // 即时是Oreo也可能出现获取不到已添加的快捷方式的情况，例如换了第三方桌面
@@ -447,7 +449,7 @@ class ActivityFreezeApps : ActivityBase() {
             enableApp(appInfo)
             appInfo.enabled = true
             appInfo.suspended = false
-            (freeze_apps?.adapter as FreezeAppAdapter?)?.notifyDataSetChanged()
+            (binding.freezeApps?.adapter as FreezeAppAdapter?)?.notifyDataSetChanged()
         }
         SceneMode.getCurrentInstance()?.setFreezeAppLeaveTime(appInfo.packageName)
         try {

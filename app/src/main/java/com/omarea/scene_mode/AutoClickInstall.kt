@@ -38,8 +38,8 @@ class AutoClickInstall : AutoClickBase() {
 
         try {
             for (ki in autoClickKeyWords.indices) {
-                val nextNodes = event.source.findAccessibilityNodeInfosByText(autoClickKeyWords[ki])
-                if (nextNodes != null && !nextNodes.isEmpty()) {
+                val nextNodes = event.source?.findAccessibilityNodeInfosByText(autoClickKeyWords[ki])
+                if (!nextNodes.isNullOrEmpty()) {
                     var node: AccessibilityNodeInfo
                     for (i in nextNodes.indices) {
                         node = nextNodes[i]
@@ -60,8 +60,8 @@ class AutoClickInstall : AutoClickBase() {
 
             for (ki in autoClickKeyWords.indices) {
 
-                val nodes = event.source.findAccessibilityNodeInfosByText(autoClickKeyWords2[ki])
-                if (nodes != null && !nodes.isEmpty()) {
+                val nodes = event.source?.findAccessibilityNodeInfosByText(autoClickKeyWords2[ki])
+                if (!nodes.isNullOrEmpty()) {
                     var node: AccessibilityNodeInfo
                     for (i in nodes.indices) {
                         node = nodes[i]
@@ -87,8 +87,8 @@ class AutoClickInstall : AutoClickBase() {
             return
 
         try {
-            val next2Nodes = event.source.findAccessibilityNodeInfosByText("继续安装")
-            if (next2Nodes != null && !next2Nodes.isEmpty()) {
+            val next2Nodes = event.source?.findAccessibilityNodeInfosByText("继续安装")
+            if (!next2Nodes.isNullOrEmpty()) {
                 var node: AccessibilityNodeInfo
                 for (i in next2Nodes.indices) {
                     node = next2Nodes[i]

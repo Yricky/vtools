@@ -1,5 +1,6 @@
 package com.omarea.vtools.activities
 
+import android.annotation.SuppressLint
 import android.os.BatteryManager
 import android.os.Bundle
 import android.os.Handler
@@ -7,21 +8,23 @@ import android.os.Looper
 import com.omarea.data.GlobalStatus
 import com.omarea.store.ChargeSpeedStore
 import com.omarea.vtools.R
+import com.omarea.vtools.databinding.ActivityChargeBinding
 import com.omarea.vtools.dialogs.DialogElectricityUnit
-import kotlinx.android.synthetic.main.activity_charge.*
 import java.util.*
 
 class ActivityCharge : ActivityBase() {
+    private lateinit var binding:ActivityChargeBinding
     private lateinit var storage: ChargeSpeedStore
     private var timer: Timer? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_charge)
+        binding = ActivityChargeBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         setBackArrow()
 
         storage = ChargeSpeedStore(this)
-        electricity_adj_unit.setOnClickListener {
+        binding.electricityAdjUnit.setOnClickListener {
             DialogElectricityUnit().showDialog(this)
         }
     }
@@ -55,13 +58,14 @@ class ActivityCharge : ActivityBase() {
         }
 
     private val hander = Handler(Looper.getMainLooper())
+    @SuppressLint("SetTextI18n")
     private fun updateUI() {
         hander.post {
-            view_speed.invalidate()
-            view_time.invalidate()
-            view_temperature.invalidate()
+            binding.viewSpeed.invalidate()
+            binding.viewTime.invalidate()
+            binding.viewTemperature.invalidate()
 
-            charge_state.text = (when (GlobalStatus.batteryStatus) {
+            binding.chargeState.text = (when (GlobalStatus.batteryStatus) {
                 BatteryManager.BATTERY_STATUS_DISCHARGING -> {
                     getString(R.string.battery_status_discharging)
                 }

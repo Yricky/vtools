@@ -14,6 +14,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.omarea.common.shared.FilePathResolver
 import com.omarea.common.ui.ProgressBarDialog
 import com.omarea.krscript.TryOpenActivity
@@ -29,7 +30,6 @@ import com.omarea.krscript.ui.PageMenuLoader
 import com.omarea.krscript.ui.ParamsFileChooserRender
 import com.omarea.vtools.R
 import com.projectkr.shell.OpenPageHelper
-import kotlinx.android.synthetic.main.activity_action_page.*
 
 class ActionPage : ActivityBase() {
     private val progressBarDialog = ProgressBarDialog(this)
@@ -194,7 +194,7 @@ class ActionPage : ActivityBase() {
     }
 
     private fun addFab(menuOption: PageMenuOption) {
-        action_page_fab.run {
+        findViewById<FloatingActionButton>(R.id.action_page_fab).run {
             visibility = View.VISIBLE
             setOnClickListener {
                 onMenuItemClick(menuOption)

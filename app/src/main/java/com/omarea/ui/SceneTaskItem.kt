@@ -1,5 +1,6 @@
 package com.omarea.ui
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -9,7 +10,7 @@ import android.widget.TextView
 import com.omarea.model.TaskAction
 import com.omarea.model.TimingTaskInfo
 import com.omarea.vtools.R
-import kotlinx.android.synthetic.main.list_scene_task_item.view.*
+import com.omarea.vtools.databinding.ListSceneTaskItemBinding
 
 class SceneTaskItem : LinearLayout {
     constructor(context: Context) : super(context) {
@@ -28,25 +29,27 @@ class SceneTaskItem : LinearLayout {
         LayoutInflater.from(context).inflate(R.layout.list_scene_task_item, this, true)
     }
 
+    @SuppressLint("SetTextI18n")
     private fun setLayout(context: Context, taskInfo: TimingTaskInfo) {
         setLayout(context)
+        val binding = ListSceneTaskItemBinding.bind(this)
 
         if (taskInfo.taskName.isNullOrEmpty()) {
-            system_scene_task_name.text = "未命名任务"
+            binding.systemSceneTaskName.text = "未命名任务"
         } else {
-            system_scene_task_name.text = taskInfo.taskName
+            binding.systemSceneTaskName.text = taskInfo.taskName
         }
 
         val timePrefix = if (taskInfo.expireDate < 1) ("每天，") else ""
-        system_scene_task_time.text = (if (taskInfo.enabled) "● " else "○ ") + timePrefix + getTimeStr(taskInfo)
-        system_scene_task_content.text = getTaskContentText(taskInfo)
+        binding.systemSceneTaskName.text = (if (taskInfo.enabled) "● " else "○ ") + timePrefix + getTimeStr(taskInfo)
+        binding.systemSceneTaskContent.text = getTaskContentText(taskInfo)
     }
 
     private fun getTimeStr(taskInfo: TimingTaskInfo): String {
         val hours = taskInfo.triggerTimeMinutes / 60
         val minutes = taskInfo.triggerTimeMinutes % 60
-        val hoursStr = if (hours < 10) ("0" + hours) else hours.toString()
-        val minutesStr = if (minutes < 10) ("0" + minutes) else minutes.toString()
+        val hoursStr = if (hours < 10) ("0$hours") else hours.toString()
+        val minutesStr = if (minutes < 10) ("0$minutes") else minutes.toString()
         val stuffix = if (taskInfo.afterScreenOff) " 屏幕关闭后" else ""
 
         return hoursStr + ":" + minutesStr + stuffix

@@ -26,19 +26,21 @@ import com.omarea.scene_mode.CpuConfigInstaller
 import com.omarea.scene_mode.ModeSwitcher
 import com.omarea.store.SpfConfig
 import com.omarea.vtools.R
-import kotlinx.android.synthetic.main.activity_cpu_modes.*
+import com.omarea.vtools.databinding.ActivityCpuModesBinding
 import java.io.File
 import java.nio.charset.Charset
 
 
 class ActivityCpuModes : ActivityBase() {
+    private lateinit var binding:ActivityCpuModesBinding
     private var author: String = ""
     private var configFileInstalled: Boolean = false
     private lateinit var modeSwitcher: ModeSwitcher
     private lateinit var globalSPF: SharedPreferences
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_cpu_modes)
+        binding = ActivityCpuModesBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         setBackArrow()
         onViewCreated()
@@ -48,14 +50,14 @@ class ActivityCpuModes : ActivityBase() {
         globalSPF = getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
         modeSwitcher = ModeSwitcher()
 
-        bindMode(cpu_config_p0, ModeSwitcher.POWERSAVE)
-        bindMode(cpu_config_p1, ModeSwitcher.BALANCE)
-        bindMode(cpu_config_p2, ModeSwitcher.PERFORMANCE)
-        bindMode(cpu_config_p3, ModeSwitcher.FAST)
+        bindMode(binding.cpuConfigP0, ModeSwitcher.POWERSAVE)
+        bindMode(binding.cpuConfigP1, ModeSwitcher.BALANCE)
+        bindMode(binding.cpuConfigP2, ModeSwitcher.PERFORMANCE)
+        bindMode(binding.cpuConfigP3, ModeSwitcher.FAST)
 
-        dynamic_control.isChecked = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
-        dynamic_control_opts.visibility = if (dynamic_control.isChecked) View.VISIBLE else View.GONE
-        dynamic_control.setOnClickListener {
+        binding.dynamicControl.isChecked = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
+        binding.dynamicControlOpts.visibility = if (binding.dynamicControl.isChecked) View.VISIBLE else View.GONE
+        binding.dynamicControl.setOnClickListener {
             val value = (it as Switch).isChecked
             if (value && !(modeSwitcher.modeConfigCompleted())) {
                 it.isChecked = false
@@ -70,34 +72,34 @@ class ActivityCpuModes : ActivityBase() {
             }
 
         }
-        dynamic_control.setOnCheckedChangeListener { _, isChecked ->
-            dynamic_control_opts.visibility = if (isChecked) View.VISIBLE else View.GONE
+        binding.dynamicControl.setOnCheckedChangeListener { _, isChecked ->
+            binding.dynamicControlOpts.visibility = if (isChecked) View.VISIBLE else View.GONE
         }
 
-        strict_mode.isChecked = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, false)
-        strict_mode.setOnClickListener {
+        binding.strictMode.isChecked = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, false)
+        binding.strictMode.setOnClickListener {
             val checked = (it as CompoundButton).isChecked
             globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_STRICT, checked).apply()
         }
 
-        delay_switch.isChecked = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DELAY, false)
-        delay_switch.setOnClickListener {
+        binding.delaySwitch.isChecked = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DELAY, false)
+        binding.delaySwitch.setOnClickListener {
             val checked = (it as CompoundButton).isChecked
             globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DELAY, checked).apply()
         }
 
-        cpu_mode_delete_outside.setOnClickListener {
+        binding.cpuModeDeleteOutside.setOnClickListener {
             DialogHelper.confirm(this, "确定删除?",
                     "确定删除安装在 /data/powercfg.sh 的外部配置脚本吗？\n它可能是Scene2遗留下来的，也可能是其它优化模块创建的\n（删除后建议重启手机一次）",
                     {
                         configInstaller.removeOutsideConfig()
-                        cpu_mode_outside.visibility = View.GONE
+                        binding.cpuModeOutside.visibility = View.GONE
                         reStartService()
                         updateState()
                     })
         }
 
-        first_mode.run {
+        binding.firstMode.run {
             when (globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_FIRST_MODE, ModeSwitcher.BALANCE)) {
                 ModeSwitcher.POWERSAVE -> setSelection(0)
                 ModeSwitcher.BALANCE -> setSelection(1)
@@ -111,7 +113,7 @@ class ActivityCpuModes : ActivityBase() {
             }
         }
 
-        sleep_mode.run {
+        binding.sleepMode.run {
             when (globalSPF.getString(SpfConfig.GLOBAL_SPF_POWERCFG_SLEEP_MODE, ModeSwitcher.POWERSAVE)) {
                 ModeSwitcher.POWERSAVE -> setSelection(0)
                 ModeSwitcher.BALANCE -> setSelection(1)
@@ -131,14 +133,14 @@ class ActivityCpuModes : ActivityBase() {
                 }
             }
         }
-        config_author_icon.setOnClickListener(sourceClick)
-        config_author.setOnClickListener(sourceClick)
+        binding.configAuthorIcon.setOnClickListener(sourceClick)
+        binding.configAuthor.setOnClickListener(sourceClick)
 
-        home_quick_switch.isChecked = globalSPF.getBoolean(SpfConfig.HOME_QUICK_SWITCH, true)
-        home_quick_switch.setOnClickListener {
+        binding.homeQuickSwitch.isChecked = globalSPF.getBoolean(SpfConfig.HOME_QUICK_SWITCH, true)
+        binding.homeQuickSwitch.setOnClickListener {
             globalSPF.edit().putBoolean(SpfConfig.HOME_QUICK_SWITCH, (it as CompoundButton).isChecked).apply()
         }
-        extreme_performance_on.setOnClickListener {
+        binding.extremePerformanceOn.setOnClickListener {
             val isChecked = (it as CompoundButton).isChecked
             if (isChecked) {
                 ThermalDisguise().disableMessage()
@@ -147,7 +149,7 @@ class ActivityCpuModes : ActivityBase() {
             }
         }
         // 卓越性能 目前仅限888处理器开放
-        extreme_performance.visibility = if (ThermalDisguise().supported()) View.VISIBLE else View.GONE
+        binding.extremePerformance.visibility = if (ThermalDisguise().supported()) View.VISIBLE else View.GONE
     }
 
     // 选择配置来源
@@ -286,30 +288,30 @@ class ActivityCpuModes : ActivityBase() {
         author = ModeSwitcher.getCurrentSource()
 
         if (author == ModeSwitcher.SOURCE_NONE) {
-            quick_switch.visibility = View.GONE
+            binding.quickSwitch.visibility = View.GONE
         } else {
-            quick_switch.visibility = View.VISIBLE
+            binding.quickSwitch.visibility = View.VISIBLE
         }
 
         if (outsideInstalled) {
-            cpu_mode_outside.visibility = View.VISIBLE
+            binding.cpuModeOutside.visibility = View.VISIBLE
         } else {
-            cpu_mode_outside.visibility = View.GONE
+            binding.cpuModeOutside.visibility = View.GONE
         }
 
-        config_author.text = ModeSwitcher.getCurrentSourceName()
+        binding.configAuthor.text = ModeSwitcher.getCurrentSourceName()
 
-        updateState(cpu_config_p0, ModeSwitcher.POWERSAVE)
-        updateState(cpu_config_p1, ModeSwitcher.BALANCE)
-        updateState(cpu_config_p2, ModeSwitcher.PERFORMANCE)
-        updateState(cpu_config_p3, ModeSwitcher.FAST)
+        updateState(binding.cpuConfigP0, ModeSwitcher.POWERSAVE)
+        updateState(binding.cpuConfigP1, ModeSwitcher.BALANCE)
+        updateState(binding.cpuConfigP2, ModeSwitcher.PERFORMANCE)
+        updateState(binding.cpuConfigP3, ModeSwitcher.FAST)
 
         if (globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT) && !modeSwitcher.modeConfigCompleted()) {
             globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, false).apply()
-            dynamic_control.isChecked = false
+            binding.dynamicControl.isChecked = false
             reStartService()
         }
-        extreme_performance_on.isChecked = ThermalDisguise().isDisabled()
+        binding.extremePerformanceOn.isChecked = ThermalDisguise().isDisabled()
     }
 
     private fun updateState(button: View, mode: String) {
@@ -325,7 +327,7 @@ class ActivityCpuModes : ActivityBase() {
         updateState()
 
         // 如果开启了动态响应 并且配置作者变了，重启后台服务
-        if (dynamic_control.isChecked && !currentAuthor.isEmpty() && currentAuthor != author) {
+        if (binding.dynamicControl.isChecked && !currentAuthor.isEmpty() && currentAuthor != author) {
             reStartService()
         }
     }
@@ -517,7 +519,7 @@ class ActivityCpuModes : ActivityBase() {
                     "",
                     "配置脚本已安装，是否开启 [动态响应] ？",
                     {
-                        dynamic_control.isChecked = true
+                        binding.dynamicControl.isChecked = true
                         globalSPF.edit().putBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, true).apply()
                         reStartService()
                     })

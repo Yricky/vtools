@@ -10,17 +10,19 @@ import android.widget.Toast
 import com.omarea.store.BatteryHistoryStore
 import com.omarea.ui.AdapterBatteryStats
 import com.omarea.vtools.R
-import kotlinx.android.synthetic.main.activity_battery_stats.*
+import com.omarea.vtools.databinding.ActivityBatteryStatsBinding
 import java.util.*
 import kotlin.math.abs
 
 
 class ActivityBatteryStats : ActivityBase() {
+    private lateinit var binding:ActivityBatteryStatsBinding
     private lateinit var storage: BatteryHistoryStore
     private var timer: Timer? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_battery_stats)
+        binding = ActivityBatteryStatsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         setBackArrow()
         onViewCreated()
@@ -88,16 +90,16 @@ class ActivityBatteryStats : ActivityBase() {
 
         hander.post {
             try {
-                battery_max_output.setData(batteryOutputMax.toFloat(), batteryOutputMax - maxOutput.toFloat())
-                battery_max_output_text.text = maxOutput.toString() + " mA"
-                battery_max_intput.setData(batteryInputMax.toFloat(), batteryInputMax - maxInput.toFloat())
-                battery_max_intput_text.text = maxInput.toString() + " mA"
+                binding.batteryMaxOutput.setData(batteryOutputMax.toFloat(), batteryOutputMax - maxOutput.toFloat())
+                binding.batteryMaxOutputText.text = maxOutput.toString() + " mA"
+                binding.batteryMaxIntput.setData(batteryInputMax.toFloat(), batteryInputMax - maxInput.toFloat())
+                binding.batteryMaxIntputText.text = maxInput.toString() + " mA"
                 if (maxTemperature < 0) {
-                    battery_max_temperature.setData(batteryTemperatureMax.toFloat(), batteryTemperatureMax.toFloat())
+                    binding.batteryMaxTemperature.setData(batteryTemperatureMax.toFloat(), batteryTemperatureMax.toFloat())
                 } else {
-                    battery_max_temperature.setData(batteryTemperatureMax.toFloat(), batteryTemperatureMax - maxTemperature.toFloat())
+                    binding.batteryMaxTemperature.setData(batteryTemperatureMax.toFloat(), batteryTemperatureMax - maxTemperature.toFloat())
                 }
-                battery_max_temperature_text.text = maxTemperature.toString() + "°C"
+                binding.batteryMaxTemperatureText.text = maxTemperature.toString() + "°C"
             } catch (ex: Exception) {
                 timer?.cancel()
                 timer = null
@@ -110,7 +112,7 @@ class ActivityBatteryStats : ActivityBase() {
         val data = storage.getAvgData(BatteryManager.BATTERY_STATUS_DISCHARGING)
 
         val sampleTime = 6
-        battery_stats.adapter = AdapterBatteryStats(context, (data.filter {
+        binding.batteryStats.adapter = AdapterBatteryStats(context, (data.filter {
             // 仅显示运行时间超过2分钟的应用数据，避免误差过大
             (it.count * sampleTime) > 120
         }), sampleTime)

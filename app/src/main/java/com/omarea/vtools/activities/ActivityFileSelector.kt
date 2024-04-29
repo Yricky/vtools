@@ -7,11 +7,11 @@ import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.widget.Toolbar
+import com.omarea.common.ui.OverScrollListView
 import com.omarea.common.ui.ProgressBarDialog
 import com.omarea.ui.AdapterFileSelector
 import com.omarea.utils.CommonCmds
 import com.omarea.vtools.R
-import kotlinx.android.synthetic.main.activity_file_selector.*
 import java.io.File
 
 class ActivityFileSelector : ActivityBase() {
@@ -105,7 +105,7 @@ class ActivityFileSelector : ActivityBase() {
             } else {
                 AdapterFileSelector.FileChooser(startDir, onSelected, ProgressBarDialog(this), extension)
             }
-            file_selector_list.adapter = adapterFileSelector
+            findViewById<OverScrollListView>(R.id.file_selector_list).adapter = adapterFileSelector
         }
     }
 }

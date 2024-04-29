@@ -15,10 +15,11 @@ import com.omarea.store.SpfConfig
 import com.omarea.utils.AppListHelper
 import com.omarea.utils.AutoSkipCloudData
 import com.omarea.vtools.R
-import kotlinx.android.synthetic.main.activity_auto_click.*
+import com.omarea.vtools.databinding.ActivityAutoClickBinding
 
 
 class ActivityAutoClick : ActivityBase() {
+    private lateinit var binding:ActivityAutoClickBinding
     private lateinit var processBarDialog: ProgressBarDialog
     private lateinit var globalSPF: SharedPreferences
     internal val myHandler: Handler = Handler(Looper.getMainLooper())
@@ -32,11 +33,11 @@ class ActivityAutoClick : ActivityBase() {
 
         globalSPF = getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
 
-        bindSPF(settings_auto_install, globalSPF, SpfConfig.GLOBAL_SPF_AUTO_INSTALL, false)
-        bindSPF(settings_skip_ad, globalSPF, SpfConfig.GLOBAL_SPF_SKIP_AD, false)
-        bindSPF(settings_skip_ad_precise, globalSPF, SpfConfig.GLOBAL_SPF_SKIP_AD_PRECISE, false)
+        bindSPF(binding.settingsAutoInstall, globalSPF, SpfConfig.GLOBAL_SPF_AUTO_INSTALL, false)
+        bindSPF(binding.settingsSkipAd, globalSPF, SpfConfig.GLOBAL_SPF_SKIP_AD, false)
+        bindSPF(binding.settingsSkipAdPrecise, globalSPF, SpfConfig.GLOBAL_SPF_SKIP_AD_PRECISE, false)
 
-        settings_skip_ad.setOnCheckedChangeListener { _, isChecked ->
+        binding.settingsSkipAd.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 if (globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_SKIP_AD_PRECISE, false)) {
                     AutoSkipCloudData().updateConfig(context, true)
@@ -44,13 +45,13 @@ class ActivityAutoClick : ActivityBase() {
             }
         }
 
-        settings_skip_ad_precise.setOnCheckedChangeListener { _, isChecked ->
+        binding.settingsSkipAdPrecise.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 AutoSkipCloudData().updateConfig(context, true)
             }
         }
 
-        ad_skip_blacklist.setOnClickListener {
+        binding.adSkipBlacklist.setOnClickListener {
             adBlackListConfig()
         }
     }

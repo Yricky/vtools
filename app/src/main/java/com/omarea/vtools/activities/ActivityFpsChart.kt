@@ -20,14 +20,14 @@ import com.omarea.library.basic.AppInfoLoader
 import com.omarea.library.calculator.Flags
 import com.omarea.library.shell.PlatformUtils
 import com.omarea.store.FpsWatchStore
-import com.omarea.utils.AccessibleServiceHelper
 import com.omarea.vtools.R
+import com.omarea.vtools.databinding.ActivityFpsChartBinding
 import com.omarea.vtools.popup.FloatFpsWatch
-import kotlinx.android.synthetic.main.activity_addin_online.*
 import org.json.JSONArray
 import org.json.JSONObject
 
 class ActivityFpsChart : ActivityBase() {
+    private lateinit var binding:ActivityFpsChartBinding
     override fun onPostResume() {
         super.onPostResume()
         delegate.onPostResume()
@@ -37,7 +37,8 @@ class ActivityFpsChart : ActivityBase() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_fps_chart)
+        binding = ActivityFpsChartBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
         window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
@@ -50,13 +51,13 @@ class ActivityFpsChart : ActivityBase() {
             window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
         }
 
-        vtools_online.loadUrl("file:///android_asset/fps-chart/index.html")
-        // vtools_online.loadUrl("https://vtools.oss-cn-beijing.aliyuncs.com/Scene-Online/fps-chart/index.html")
+        binding.vtoolsOnline.loadUrl("file:///android_asset/fps-chart/index.html")
+        // binding.vtoolsOnline.loadUrl("https://vtools.oss-cn-beijing.aliyuncs.com/Scene-Online/fps-chart/index.html")
         val context = this@ActivityFpsChart
         val progressBarDialog = ProgressBarDialog(context)
 
         // 处理alert、confirm
-        vtools_online.webChromeClient = object : WebChromeClient() {
+        binding.vtoolsOnline.webChromeClient = object : WebChromeClient() {
             override fun onJsAlert(view: WebView?, url: String?, message: String?, result: JsResult?): Boolean {
                 DialogHelper.animDialog(
                         AlertDialog.Builder(context)
@@ -87,7 +88,7 @@ class ActivityFpsChart : ActivityBase() {
         }
 
         // 处理loading、文件下载
-        vtools_online.setWebViewClient(object : WebViewClient() {
+        binding.vtoolsOnline.setWebViewClient(object : WebViewClient() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 progressBarDialog.hideDialog()
@@ -110,13 +111,13 @@ class ActivityFpsChart : ActivityBase() {
             }
         })
 
-        vtools_online.settings.javaScriptEnabled = true
-        vtools_online.settings.setLoadWithOverviewMode(true);
-        vtools_online.settings.setUseWideViewPort(true);
+        binding.vtoolsOnline.settings.javaScriptEnabled = true
+        binding.vtoolsOnline.settings.setLoadWithOverviewMode(true);
+        binding.vtoolsOnline.settings.setUseWideViewPort(true);
         val fpsWatchStore = FpsWatchStore(this)
 
         val appInfoLoader = AppInfoLoader(context)
-        vtools_online.addJavascriptInterface(object {
+        binding.vtoolsOnline.addJavascriptInterface(object {
             private var pmInstance: PackageManager? = null
             protected val pm: PackageManager
                 get() {
@@ -218,7 +219,7 @@ class ActivityFpsChart : ActivityBase() {
             public fun setStatusBarColor(colorStr: String): Boolean {
                 try {
                     val color = Color.parseColor(colorStr)
-                    vtools_online.post {
+                    binding.vtoolsOnline.post {
                         window.statusBarColor = color
                         if (Build.VERSION.SDK_INT >= 23) {
                             if (Color.red(color) > 180 && Color.green(color) > 180 && Color.blue(color) > 180) {
@@ -238,7 +239,7 @@ class ActivityFpsChart : ActivityBase() {
             public fun setNavigationBarColor(colorStr: String): Boolean {
                 try {
                     val color = Color.parseColor(colorStr)
-                    vtools_online.post {
+                    binding.vtoolsOnline.post {
                         window.navigationBarColor = color
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                             if (Color.red(color) > 180 && Color.green(color) > 180 && Color.blue(color) > 180) {
@@ -258,7 +259,7 @@ class ActivityFpsChart : ActivityBase() {
             @JavascriptInterface
             public fun showToast(str: String) {
                 try {
-                    vtools_online.post {
+                    binding.vtoolsOnline.post {
                         Toast.makeText(context, str, Toast.LENGTH_LONG).show()
                     }
                 } catch (ex: java.lang.Exception) {
@@ -268,17 +269,17 @@ class ActivityFpsChart : ActivityBase() {
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_BACK && vtools_online.canGoBack()) {
-            vtools_online.goBack()
+        if (keyCode == KeyEvent.KEYCODE_BACK && binding.vtoolsOnline.canGoBack()) {
+            binding.vtoolsOnline.goBack()
             return true
         } else {
             return super.onKeyDown(keyCode, event)
         }
     }
     override fun onDestroy() {
-        vtools_online.clearCache(true)
-        vtools_online.removeAllViews()
-        vtools_online.destroy()
+        binding.vtoolsOnline.clearCache(true)
+        binding.vtoolsOnline.removeAllViews()
+        binding.vtoolsOnline.destroy()
         super.onDestroy()
     }
 

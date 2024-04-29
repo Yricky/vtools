@@ -12,14 +12,17 @@ import android.view.ViewGroup
 import android.widget.Toast
 import com.omarea.utils.AlipayDonate
 import com.omarea.vtools.R
-import kotlinx.android.synthetic.main.fragment_donate.*
+import com.omarea.vtools.databinding.FragmentDonateBinding
 
 
 class FragmentDonate : androidx.fragment.app.Fragment() {
+    private lateinit var binding:FragmentDonateBinding
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? =
-            inflater.inflate(R.layout.fragment_donate, container, false)
+        FragmentDonateBinding.inflate(inflater, container,false).also {
+            binding = it
+        }.root
 
     override fun onResume() {
         super.onResume()
@@ -30,13 +33,13 @@ class FragmentDonate : androidx.fragment.app.Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        pay_paypal.setOnClickListener {
+        binding.payPaypal.setOnClickListener {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.paypal.me/duduski")))
         }
-        pay_alipay.setOnClickListener {
+        binding.payAlipay.setOnClickListener {
             AlipayDonate(context!!).jumpAlipay()
         }
-        pay_wxpay.setOnClickListener {
+        binding.payWxpay.setOnClickListener {
             /*
             try {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("weixin://dl/business/?ticket=wxp://f2f0YqS-OUviH9sQNUDgXJhOP3fld3htEqqO")))
@@ -47,7 +50,7 @@ class FragmentDonate : androidx.fragment.app.Fragment() {
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("http://vtools.omarea.com/")))
             Toast.makeText(context!!, "暂不支持直接调起，请保存收款码然后使用微信扫码（在扫一扫界面从相册选择图片）！", Toast.LENGTH_SHORT).show()
         }
-        pay_alipay_code.setOnClickListener {
+        binding.payAlipayCode.setOnClickListener {
             //获取剪贴板管理器：
             val cm = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             // 创建普通字符型ClipData
@@ -62,7 +65,7 @@ class FragmentDonate : androidx.fragment.app.Fragment() {
             } catch (ex: Exception) {
             }
         }
-        pay_alipay_command.setOnClickListener {
+        binding.payAlipayCommand.setOnClickListener {
             //获取剪贴板管理器：
             val cm = context!!.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             // 创建普通字符型ClipData

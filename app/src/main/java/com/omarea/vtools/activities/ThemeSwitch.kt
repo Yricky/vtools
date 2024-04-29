@@ -148,7 +148,7 @@ object ThemeSwitch {
         return themeMode
     }
 
-    private fun isDarkColor(wallPaper: Drawable): Boolean {
+    private fun isDarkColor(wallPaper: Drawable?): Boolean {
         // 根据壁纸色彩设置主题
         val bitmap = (wallPaper as BitmapDrawable).bitmap
         val h = bitmap.height - 1

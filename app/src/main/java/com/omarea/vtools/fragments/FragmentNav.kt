@@ -22,13 +22,14 @@ import com.omarea.shell_utils.BackupRestoreUtils
 import com.omarea.utils.AccessibleServiceHelper
 import com.omarea.vtools.R
 import com.omarea.vtools.activities.*
+import com.omarea.vtools.databinding.FragmentNavBinding
 import com.omarea.vtools.dialogs.DialogXposedGlobalConfig
 import com.omarea.xposed.XposedCheck
 import com.projectkr.shell.OpenPageHelper
-import kotlinx.android.synthetic.main.fragment_nav.*
 
 class FragmentNav : Fragment(), View.OnClickListener {
     private lateinit var themeMode: ThemeMode
+    private lateinit var binding:FragmentNavBinding
 
     companion object {
         fun createPage(themeMode: ThemeMode): Fragment {
@@ -39,8 +40,11 @@ class FragmentNav : Fragment(), View.OnClickListener {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? =
-            inflater.inflate(R.layout.fragment_nav, container, false)
+                              savedInstanceState: Bundle?): View =
+        FragmentNavBinding.inflate(inflater,container,false).also {
+            binding = it
+        }.root
+//            inflater.inflate(R.layout.fragment_nav, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -55,7 +59,7 @@ class FragmentNav : Fragment(), View.OnClickListener {
         }
 
         // 激活辅助服务按钮
-        nav_scene_service_not_active.setOnClickListener {
+        binding.navSceneServiceNotActive.setOnClickListener {
             startService()
         }
     }
@@ -117,7 +121,7 @@ class FragmentNav : Fragment(), View.OnClickListener {
 
         // 辅助服务激活状态
         val serviceState = AccessibleServiceHelper().serviceRunning(context!!)
-        nav_scene_service_not_active.visibility = if (serviceState) View.GONE else View.VISIBLE
+        binding.navSceneServiceNotActive.visibility = if (serviceState) View.GONE else View.VISIBLE
 
         activity!!.title = getString(R.string.app_name)
     }

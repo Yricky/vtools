@@ -1,9 +1,8 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 
 android {
-    dataBinding {
+    viewBinding {
         enabled =true
     }
     signingConfigs {
@@ -14,10 +13,10 @@ android {
             storePassword 'asdf1234'
         }
     }
-    compileSdkVersion 30
-    buildToolsVersion '29.0.2'
+    compileSdkVersion 34
+    buildToolsVersion '30.0.3'
     defaultConfig {
-        resConfigs "zh"
+        resConfigs 'zh'
         applicationId "com.omarea.vtools"
         minSdkVersion 23
         targetSdkVersion 30
@@ -73,6 +72,7 @@ android {
         }
     }
     ndkVersion '23.1.7779620'
+    namespace 'com.omarea.vtools'
 }
 
 dependencies {

@@ -20,10 +20,11 @@ import com.omarea.library.basic.UninstalledApp
 import com.omarea.model.AppInfo
 import com.omarea.ui.AppListAdapter
 import com.omarea.vtools.R
-import kotlinx.android.synthetic.main.activity_hidden_apps.*
+import com.omarea.vtools.databinding.ActivityHiddenAppsBinding
 import java.lang.ref.WeakReference
 
 class ActivityHiddenApps : ActivityBase() {
+    private lateinit var binding:ActivityHiddenAppsBinding
     private lateinit var progressBarDialog: ProgressBarDialog
     private var adapter: WeakReference<AppListAdapter>? = null
     private val handler = Handler(Looper.getMainLooper())
@@ -43,12 +44,13 @@ class ActivityHiddenApps : ActivityBase() {
     @SuppressLint("ApplySharedPref")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_hidden_apps)
+        binding = ActivityHiddenAppsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         setBackArrow()
 
         pm = packageManager
         progressBarDialog = ProgressBarDialog(this)
-        hidden_app.addHeaderView(this.layoutInflater.inflate(R.layout.list_header_app, null))
+        binding.hiddenApp.addHeaderView(this.layoutInflater.inflate(R.layout.list_header_app, null))
     }
 
     private fun getAppInfo(it: ApplicationInfo): AppInfo {
@@ -74,9 +76,9 @@ class ActivityHiddenApps : ActivityBase() {
             handler.post {
                 progressBarDialog.hideDialog()
                 val adapterObj = AppListAdapter(context, appList)
-                hidden_app.adapter = adapterObj
+                binding.hiddenApp.adapter = adapterObj
                 adapter = WeakReference(adapterObj)
-                hidden_app.onItemClickListener = AdapterView.OnItemClickListener { _, itemView, postion, _ ->
+                binding.hiddenApp.onItemClickListener = AdapterView.OnItemClickListener { _, itemView, postion, _ ->
                     if (postion == 0) {
                         val checkBox = itemView.findViewById(R.id.select_state_all) as CheckBox
                         checkBox.isChecked = !checkBox.isChecked
@@ -87,7 +89,7 @@ class ActivityHiddenApps : ActivityBase() {
                     } else {
                         val checkBox = itemView.findViewById(R.id.select_state) as CheckBox
                         checkBox.isChecked = !checkBox.isChecked
-                        val all = hidden_app.findViewById<CheckBox>(R.id.select_state_all)
+                        val all = binding.hiddenApp.findViewById<CheckBox>(R.id.select_state_all)
                         if (adapter?.get() != null) {
                             all.isChecked = adapter?.get()!!.getIsAllSelected()
                         }

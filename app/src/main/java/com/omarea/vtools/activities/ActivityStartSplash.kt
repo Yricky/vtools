@@ -24,7 +24,7 @@ import com.omarea.permissions.CheckRootStatus
 import com.omarea.permissions.WriteSettings
 import com.omarea.store.SpfConfig
 import com.omarea.vtools.R
-import kotlinx.android.synthetic.main.activity_start_splash.*
+import com.omarea.vtools.databinding.ActivityStartSplashBinding
 import java.util.*
 
 class ActivityStartSplash : Activity() {
@@ -32,6 +32,7 @@ class ActivityStartSplash : Activity() {
         public var finished = false
     }
 
+    private lateinit var binding:ActivityStartSplashBinding
     private lateinit var globalSPF: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,8 +40,8 @@ class ActivityStartSplash : Activity() {
 
         val themeMode = ThemeSwitch.switchTheme(this)
         super.onCreate(savedInstanceState)
-
-        setContentView(R.layout.activity_start_splash)
+        binding = ActivityStartSplashBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         updateThemeStyle(themeMode)
 
         checkPermissions()
@@ -55,7 +56,7 @@ class ActivityStartSplash : Activity() {
         val btnConfirm = view.findViewById<Button>(R.id.btn_confirm)
         val agreement = view.findViewById<CompoundButton>(R.id.agreement)
         val timer = Timer()
-        var timeout = 30
+        var timeout = 5
         var clickItems = 0
         timer.schedule(object : TimerTask() {
             override fun run() {
@@ -96,11 +97,11 @@ class ActivityStartSplash : Activity() {
      */
     private fun updateThemeStyle(themeMode: ThemeMode) {
         if (themeMode.isDarkMode) {
-            splash_root.setBackgroundColor(Color.argb(255, 0, 0, 0))
+            binding.splashRoot.setBackgroundColor(Color.argb(255, 0, 0, 0))
             getWindow().setNavigationBarColor(Color.argb(255, 0, 0, 0))
         } else {
             // getWindow().setNavigationBarColor(getColorAccent())
-            splash_root.setBackgroundColor(Color.argb(255, 255, 255, 255))
+            binding.splashRoot.setBackgroundColor(Color.argb(255, 255, 255, 255))
             getWindow().setNavigationBarColor(Color.argb(255, 255, 255, 255))
         }
 
@@ -128,20 +129,20 @@ class ActivityStartSplash : Activity() {
         checkRoot()
     }
 
-    private class CheckFileWirte(private val context: ActivityStartSplash) : Runnable {
+    private inner class CheckFileWirte : Runnable {
         override fun run() {
-            context.start_state_text.text = "检查并获取必需权限……"
-            context.hasRoot = true
+            binding.startStateText.text = "检查并获取必需权限……"
+            hasRoot = true
 
-            context.checkFileWrite(InstallBusybox(context))
+            checkFileWrite(InstallBusybox())
         }
 
     }
 
-    private class InstallBusybox(private val context: ActivityStartSplash) : Runnable {
+    private inner class InstallBusybox() : Runnable {
         override fun run() {
-            context.start_state_text.text = "检查Busybox是否安装..."
-            Busybox(context).forceInstall(BusyboxInstalled(context))
+            binding.startStateText.text = "检查Busybox是否安装..."
+            Busybox(this@ActivityStartSplash).forceInstall(BusyboxInstalled(this@ActivityStartSplash))
         }
 
     }
@@ -204,18 +205,18 @@ class ActivityStartSplash : Activity() {
         val disableSeLinux = globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_DISABLE_ENFORCE, false)
         CheckRootStatus(this, Runnable {
             if (globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_CONTRACT, false)) {
-                CheckFileWirte(this).run()
+                CheckFileWirte().run()
             } else {
                 initContractAction()
             }
-        }, disableSeLinux, InstallBusybox(this)).forceGetRoot()
+        }, disableSeLinux, InstallBusybox()).forceGetRoot()
     }
 
     /**
      * 启动完成
      */
     private fun startToFinish() {
-        start_state_text.text = "启动完成！"
+        binding.startStateText.text = "启动完成！"
 
         val intent = Intent(this.applicationContext, ActivityMain::class.java)
         startActivity(intent)

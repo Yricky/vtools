@@ -18,12 +18,13 @@ import com.omarea.model.AppInfo
 import com.omarea.ui.AppListAdapter
 import com.omarea.utils.AppListHelper
 import com.omarea.vtools.R
+import com.omarea.vtools.databinding.FragmentAppListBinding
 import com.omarea.vtools.dialogs.DialogAppOptions
 import com.omarea.vtools.dialogs.DialogSingleAppOptions
-import kotlinx.android.synthetic.main.fragment_app_list.*
 import java.lang.ref.WeakReference
 
 class FragmentAppBackup(private val myHandler: Handler) : androidx.fragment.app.Fragment() {
+    private lateinit var binding:FragmentAppListBinding
     private lateinit var processBarDialog: ProgressBarDialog
     private lateinit var appListHelper: AppListHelper
     private var appList: ArrayList<AppInfo>? = null
@@ -33,14 +34,14 @@ class FragmentAppBackup(private val myHandler: Handler) : androidx.fragment.app.
                               savedInstanceState: Bundle?): View? {
         processBarDialog = ProgressBarDialog(activity!!, "FragmentAppBackup")
         appListHelper = AppListHelper(context!!)
-
-        return inflater.inflate(R.layout.fragment_app_list, container, false)
+        binding = FragmentAppListBinding.inflate(inflater,container,false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        app_list.addHeaderView(this.layoutInflater.inflate(R.layout.list_header_app, null))
+        binding.appList.addHeaderView(this.layoutInflater.inflate(R.layout.list_header_app, null))
 
         val onItemLongClick = AdapterView.OnItemLongClickListener { parent, _, position, id ->
             if (position < 1)
@@ -51,8 +52,8 @@ class FragmentAppBackup(private val myHandler: Handler) : androidx.fragment.app.
             true
         }
 
-        app_list.onItemLongClickListener = onItemLongClick
-        fab_apps.setOnClickListener {
+        binding.appList.onItemLongClickListener = onItemLongClick
+        binding.fabApps.setOnClickListener {
             getSelectedAppShowOptions(activity!!)
         }
 
@@ -60,7 +61,7 @@ class FragmentAppBackup(private val myHandler: Handler) : androidx.fragment.app.
     }
 
     private fun getSelectedAppShowOptions(activity: Activity) {
-        var adapter = app_list.adapter
+        var adapter = binding.appList.adapter
         adapter = (adapter as HeaderViewListAdapter).wrappedAdapter
         val selectedItems = (adapter as AppListAdapter).getSelectedItems()
         if (selectedItems.size == 0) {
@@ -78,7 +79,7 @@ class FragmentAppBackup(private val myHandler: Handler) : androidx.fragment.app.
             myHandler.post {
                 processBarDialog.hideDialog()
             }
-            app_list?.run {
+            binding.appList?.run {
                 setListData(appList, this)
             }
         }.start()
@@ -108,11 +109,11 @@ class FragmentAppBackup(private val myHandler: Handler) : androidx.fragment.app.
                             all.isChecked = adapter.get()!!.getIsAllSelected()
                         }
                     }
-                    fab_apps.visibility = if (adapter.get()?.hasSelected() == true) View.VISIBLE else View.GONE
+                    binding.fabApps.visibility = if (adapter.get()?.hasSelected() == true) View.VISIBLE else View.GONE
                 }
                 val all = lv.findViewById<CheckBox>(R.id.select_state_all)
                 all.isChecked = false
-                fab_apps.visibility = View.GONE
+                binding.fabApps.visibility = View.GONE
             } catch (ex: Exception) {
             }
         }
@@ -125,7 +126,7 @@ class FragmentAppBackup(private val myHandler: Handler) : androidx.fragment.app.
         set (value) {
             if (keywords != value) {
                 keywords = value
-                app_list?.run {
+                binding.appList.run {
                     setListData(appList, this)
                 }
             }
