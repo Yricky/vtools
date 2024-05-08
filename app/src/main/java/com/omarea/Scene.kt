@@ -8,6 +8,7 @@ import android.content.res.Configuration
 import android.os.Handler
 import android.os.Looper
 import android.widget.Toast
+import androidx.core.content.PermissionChecker
 import com.omarea.common.shared.FileWrite
 import com.omarea.common.shell.ShellExecutor
 import com.omarea.data.EventBus
@@ -80,17 +81,15 @@ class Scene : Application() {
         public fun postDelayed(runnable: Runnable, delayMillis: Long) {
             handler.postDelayed(runnable, delayMillis)
         }
+
+        fun checkPermission(permission: String): Boolean =
+            PermissionChecker.checkSelfPermission(context, permission) == PermissionChecker.PERMISSION_GRANTED
     }
 
     // 锁屏状态监听
     private lateinit var screenState: ScreenState
 
     private var lastThemeId = R.style.AppTheme
-    private fun setAppTheme(theme: Int) {
-        if (lastThemeId != theme) {
-            setTheme(theme)
-        }
-    }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)

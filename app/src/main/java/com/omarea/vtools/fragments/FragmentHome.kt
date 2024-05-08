@@ -55,7 +55,7 @@ class FragmentHome : androidx.fragment.app.Fragment() {
 
     private suspend fun forceKSWAPD(mode: Int): String {
         return withContext(Dispatchers.Default) {
-            SwapUtils(context!!).forceKswapd(mode)
+            SwapUtils(requireContext()).forceKswapd(mode)
         }
     }
 
@@ -70,10 +70,10 @@ class FragmentHome : androidx.fragment.app.Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        activityManager = context!!.getSystemService(ACTIVITY_SERVICE) as ActivityManager
-        batteryManager = context!!.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
+        activityManager = requireContext().getSystemService(ACTIVITY_SERVICE) as ActivityManager
+        batteryManager = requireContext().getSystemService(Context.BATTERY_SERVICE) as BatteryManager
 
-        globalSPF = context!!.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
+        globalSPF = requireContext().getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
 
         binding.btnPowersave.setOnClickListener {
             installConfig(ModeSwitcher.POWERSAVE)
@@ -93,7 +93,7 @@ class FragmentHome : androidx.fragment.app.Fragment() {
             binding.homeMessage.text = GlobalStatus.homeMessage
         }
 
-        spf = context!!.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
+        spf = requireContext().getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
 
         binding.homeClearRam.setOnClickListener {
             binding.homeRaminfoText.text = getString(R.string.please_wait)
@@ -127,12 +127,12 @@ class FragmentHome : androidx.fragment.app.Fragment() {
                 val intent = Intent(Intent.ACTION_VIEW, uri)
                 startActivity(intent)
             } catch (ex: Exception) {
-                Toast.makeText(context!!, "启动在线页面失败！", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "启动在线页面失败！", Toast.LENGTH_SHORT).show()
             }
         }
 
         binding.homeBatteryEdit.setOnClickListener {
-            DialogElectricityUnit().showDialog(context!!)
+            DialogElectricityUnit().showDialog(requireContext())
         }
 
         // 点击CPU核心 查看详细参数
@@ -146,7 +146,7 @@ class FragmentHome : androidx.fragment.app.Fragment() {
                     msg.append(param.value)
                     msg.append("\n")
                 }
-                DialogHelper.alert(activity!!, "调度器参数", msg.toString())
+                DialogHelper.alert(requireActivity(), "调度器参数", msg.toString())
             }
         }
 
@@ -175,7 +175,7 @@ class FragmentHome : androidx.fragment.app.Fragment() {
         if (isDetached) {
             return
         }
-        activity!!.title = getString(R.string.app_name)
+        requireActivity().title = getString(R.string.app_name)
 
         if (globalSPF.getBoolean(SpfConfig.HOME_QUICK_SWITCH, true) && (CpuConfigInstaller().dynamicSupport(Scene.context) || modeSwitcher.modeConfigCompleted())) {
             binding.powermodeToggles.visibility = View.VISIBLE
@@ -251,7 +251,7 @@ class FragmentHome : androidx.fragment.app.Fragment() {
      * dp转换成px
      */
     private fun dp2px(dpValue: Float): Int {
-        val scale = context!!.resources.displayMetrics.density
+        val scale = requireContext().resources.displayMetrics.density
         return (dpValue * scale + 0.5f).toInt()
     }
 
@@ -348,7 +348,7 @@ class FragmentHome : androidx.fragment.app.Fragment() {
                         layoutParams.height = dp2px(105 * 2F)
                     }
                     binding.cpuCoreList.layoutParams = layoutParams
-                    binding.cpuCoreList.adapter = AdapterCpuCores(context!!, cores)
+                    binding.cpuCoreList.adapter = AdapterCpuCores(requireContext(), cores)
                 } else {
                     (binding.cpuCoreList.adapter as AdapterCpuCores).setData(cores)
                 }
@@ -404,7 +404,7 @@ class FragmentHome : androidx.fragment.app.Fragment() {
                 if (modeSwitcher.modeConfigCompleted()) {
                     modeSwitcher.executePowercfgMode(mode, packageName)
                 } else {
-                    CpuConfigInstaller().installOfficialConfig(context!!)
+                    CpuConfigInstaller().installOfficialConfig(requireContext())
                     modeSwitcher.executePowercfgMode(mode, packageName)
                 }
             }
@@ -412,12 +412,12 @@ class FragmentHome : androidx.fragment.app.Fragment() {
     }
 
     private fun installConfig(toMode: String) {
-        val dynamic = AccessibleServiceHelper().serviceRunning(context!!) && spf.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
+        val dynamic = AccessibleServiceHelper().serviceRunning(requireContext()) && spf.getBoolean(SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL, SpfConfig.GLOBAL_SPF_DYNAMIC_CONTROL_DEFAULT)
         if (!dynamic && ModeSwitcher.getCurrentPowerMode() == toMode) {
             modeSwitcher.setCurrent("", "")
             globalSPF.edit().putString(SpfConfig.GLOBAL_SPF_POWERCFG, "").apply()
             myHandler.post {
-                DialogHelper.confirmBlur(this.activity!!,
+                DialogHelper.confirmBlur(requireActivity(),
                         "提示",
                         "需要重启手机才能恢复默认调度，是否立即重启？",
                         {
@@ -429,7 +429,7 @@ class FragmentHome : androidx.fragment.app.Fragment() {
             return
         }
 
-        val progressBarDialog = ProgressBarDialog(this.activity!!, "home-mode-switch")
+        val progressBarDialog = ProgressBarDialog(requireActivity(), "home-mode-switch")
         progressBarDialog.showDialog(getString(R.string.please_wait))
 
         GlobalScope.launch(Dispatchers.Main) {
@@ -441,13 +441,13 @@ class FragmentHome : androidx.fragment.app.Fragment() {
             updateInfo()
             if (dynamic) {
                 globalSPF.edit().putString(SpfConfig.GLOBAL_SPF_POWERCFG, "").apply()
-                DialogHelper.alert(activity!!,
+                DialogHelper.alert(requireActivity(),
                         "提示",
                         "“场景模式-动态响应”已被激活，你手动选择的模式随时可能被覆盖。\n\n如果你需要长期使用手动控制，请前往“功能”菜单-“性能界面”界面关闭“动态响应”！")
             } else {
                 globalSPF.edit().putString(SpfConfig.GLOBAL_SPF_POWERCFG, toMode).apply()
                 if (!globalSPF.getBoolean(SpfConfig.GLOBAL_SPF_POWERCFG_FRIST_NOTIFY, false)) {
-                    DialogHelper.confirm(activity!!,
+                    DialogHelper.confirm(requireActivity(),
                             "提示",
                             "如果你已允许Scene自启动，手机重启后，Scene还会自动激活刚刚选择的模式。\n\n如果需要恢复系统默认调度，请再次点击，然后重启手机！",
                             DialogHelper.DialogButton(getString(R.string.btn_confirm)),

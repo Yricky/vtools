@@ -20,6 +20,7 @@ import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.PermissionChecker
+import com.omarea.Scene.Companion.checkPermission
 import com.omarea.common.ui.ThemeMode
 import com.omarea.store.SpfConfig
 import com.omarea.vtools.R
@@ -39,7 +40,13 @@ object ThemeSwitch {
 
     private var globalSPF: SharedPreferences? = null
 
-    private fun checkPermission(context: Context, permission: String): Boolean = PermissionChecker.checkSelfPermission(context, permission) == PermissionChecker.PERMISSION_GRANTED
+    fun hasRWPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            checkPermission( Manifest.permission.READ_MEDIA_IMAGES)
+        } else {
+            checkPermission( Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+    }
 
     internal fun switchTheme(activity: Activity): ThemeMode {
         val themeMode = ThemeMode()
@@ -50,7 +57,7 @@ object ThemeSwitch {
         val theme = globalSPF!!.getInt(SpfConfig.GLOBAL_SPF_THEME, -1)
 
         // 设置壁纸作为背景需要读取外置存储权限（如果没权限，就恢复默认主题）
-        if (theme == 10 && !(checkPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) && checkPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE))) {
+        if (theme == 10 && !hasRWPermission()) {
             globalSPF!!.edit().remove(SpfConfig.GLOBAL_SPF_THEME).apply()
             return switchTheme(activity)
         }
@@ -67,7 +74,7 @@ object ThemeSwitch {
                         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
                         R.style.AppThemeNoActionBarNight
                     } else {
-                        themeMode.isLightStatusBar = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                        themeMode.isLightStatusBar = true
                         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
                         R.style.AppThemeWhite
                     }
@@ -80,7 +87,7 @@ object ThemeSwitch {
                 }
                 -3 -> {
                     themeMode.isDarkMode = false
-                    themeMode.isLightStatusBar = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
+                    themeMode.isLightStatusBar = true
                     AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
                     R.style.AppThemeWhite
                 }
@@ -125,9 +132,8 @@ object ThemeSwitch {
                     themeMode.isLightStatusBar = true
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                         activity.window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR or View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    } else
                         activity.window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                    }
 
                     if (!(activity is ActivityMain)) {
                         activity.window.navigationBarColor = Color.TRANSPARENT

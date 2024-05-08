@@ -3,6 +3,7 @@ package com.omarea.library.shell;
 import android.content.Context;
 import android.util.Log;
 
+import com.omarea.Scene;
 import com.omarea.common.shell.KeepShellPublic;
 import com.omarea.common.shell.KernelProrp;
 import com.omarea.model.ProcessInfo;
@@ -87,7 +88,7 @@ public class ProcessUtils {
             add("toybox-outside64");
             add("ps");
             add("top");
-            add("com.omarea.vtools");
+            add(Scene.context.getPackageName());
         }
     };
 

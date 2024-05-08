@@ -80,13 +80,6 @@ class ActivityOtherSettings : ActivityBase() {
         }
     }
 
-    private fun checkPermission(context: Context, permission: String): Boolean = PermissionChecker.checkSelfPermission(context, permission) == PermissionChecker.PERMISSION_GRANTED
-
-    private fun hasRWPermission(): Boolean {
-        return checkPermission(this.applicationContext, Manifest.permission.READ_EXTERNAL_STORAGE)
-                &&
-                checkPermission(this.applicationContext, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-    }
 
     fun onThemeClick(view: View) {
         val tag = view.tag.toString().toInt()
@@ -94,7 +87,7 @@ class ActivityOtherSettings : ActivityBase() {
             spf.edit().remove(SpfConfig.GLOBAL_SPF_THEME).apply()
             this.recreate()
         } else {
-            if (tag == 10 && !hasRWPermission()) {
+            if (tag == 10 && !ThemeSwitch.hasRWPermission()) {
                 DialogHelper.helpInfo(view.context, "", getString(R.string.wallpaper_rw_permission))
                 (view as Switch).isChecked = false
             } else {

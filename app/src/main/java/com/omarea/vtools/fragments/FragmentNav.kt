@@ -65,15 +65,15 @@ class FragmentNav : Fragment(), View.OnClickListener {
     }
 
     private fun startService() {
-        AccessibleServiceHelper().stopSceneModeService(activity!!.applicationContext)
+        AccessibleServiceHelper().stopSceneModeService(requireActivity().applicationContext)
 
         /* 使用ROOT权限激活辅助服务会导致某些授权拿不到，导致事件触发不完整 */
         /*
 
-        val dialog = ProgressBarDialog(context!!)
+        val dialog = ProgressBarDialog(requireContext())
         dialog.showDialog("尝试使用ROOT权限开启服务...")
         Thread(Runnable {
-            if (!AccessibleServiceHelper().startSceneModeService(context!!)) {
+            if (!AccessibleServiceHelper().startSceneModeService(requireContext())) {
                 try {
                     myHandler.post {
                         val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
@@ -91,7 +91,7 @@ class FragmentNav : Fragment(), View.OnClickListener {
             } else {
                 myHandler.post {
                     dialog.hideDialog()
-                    btn_config_service_not_active.visibility = if (AccessibleServiceHelper().serviceRunning(context!!)) View.GONE else View.VISIBLE
+                    btn_config_service_not_active.visibility = if (AccessibleServiceHelper().serviceRunning(requireContext())) View.GONE else View.VISIBLE
                 }
             }
         }).start()
@@ -120,65 +120,65 @@ class FragmentNav : Fragment(), View.OnClickListener {
         }
 
         // 辅助服务激活状态
-        val serviceState = AccessibleServiceHelper().serviceRunning(context!!)
+        val serviceState = AccessibleServiceHelper().serviceRunning(requireContext())
         binding.navSceneServiceNotActive.visibility = if (serviceState) View.GONE else View.VISIBLE
 
-        activity!!.title = getString(R.string.app_name)
+        requireActivity().title = getString(R.string.app_name)
     }
 
-    private fun tryOpenApp(packageName: String) {
-        val pm = context!!.packageManager
-        if (packageName.equals("com.omarea.gesture")) {
-            try {
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                intent.setComponent(ComponentName("com.omarea.gesture", "com.omarea.gesture.SettingsActivity"))
-                startActivity(intent)
-                return
-            } catch (ex: java.lang.Exception) {
-            }
-        } else if (packageName.equals("com.omarea.filter")) {
-            try {
-                val intent = Intent(Intent.ACTION_VIEW)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                intent.setComponent(ComponentName("com.omarea.filter", "com.omarea.filter.SettingsActivity"))
-                startActivity(intent)
-                return
-            } catch (ex: java.lang.Exception) {
-            }
-        }
-
-        try {
-            val intent = pm.getLaunchIntentForPackage(packageName)
-            if (intent != null) {
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                startActivity(intent)
-                return
-            }
-        } catch (ex: java.lang.Exception) {
-        }
-
-        openUrl("https://www.coolapk.com/apk/" + packageName)
-        /*
-            Uri uri = Uri.parse("market://details?id=" + appPkg);
-            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            if (marketPkg != null) {// 如果没给市场的包名，则系统会弹出市场的列表让你进行选择。
-                intent.setPackage(marketPkg);
-            }
-            try {
-                context.startActivity(intent);
-                return true;
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                return false;
-            }
-        */
-    }
+//    private fun tryOpenApp(packageName: String) {
+//        val pm = requireContext().packageManager
+//        if (packageName.equals("com.omarea.gesture")) {
+//            try {
+//                val intent = Intent(Intent.ACTION_VIEW)
+//                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//                intent.setComponent(ComponentName("com.omarea.gesture", "com.omarea.gesture.SettingsActivity"))
+//                startActivity(intent)
+//                return
+//            } catch (ex: java.lang.Exception) {
+//            }
+//        } else if (packageName.equals("com.omarea.filter")) {
+//            try {
+//                val intent = Intent(Intent.ACTION_VIEW)
+//                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//                intent.setComponent(ComponentName("com.omarea.filter", "com.omarea.filter.SettingsActivity"))
+//                startActivity(intent)
+//                return
+//            } catch (ex: java.lang.Exception) {
+//            }
+//        }
+//
+//        try {
+//            val intent = pm.getLaunchIntentForPackage(packageName)
+//            if (intent != null) {
+//                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+//                startActivity(intent)
+//                return
+//            }
+//        } catch (ex: java.lang.Exception) {
+//        }
+//
+//        openUrl("https://www.coolapk.com/apk/" + packageName)
+//        /*
+//            Uri uri = Uri.parse("market://details?id=" + appPkg);
+//            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+//            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//            if (marketPkg != null) {// 如果没给市场的包名，则系统会弹出市场的列表让你进行选择。
+//                intent.setPackage(marketPkg);
+//            }
+//            try {
+//                context.startActivity(intent);
+//                return true;
+//            } catch (Exception ex) {
+//                ex.printStackTrace();
+//                return false;
+//            }
+//        */
+//    }
 
     override fun onClick(v: View?) {
         v?.run {
-            if (!CheckRootStatus.lastCheckResult && "root".equals(getTag())) {
+            if (!CheckRootStatus.lastCheckResult && "root" == tag) {
                 Toast.makeText(context, "没有获得ROOT权限，不能使用本功能", Toast.LENGTH_SHORT).show()
                 return
             }
@@ -186,7 +186,7 @@ class FragmentNav : Fragment(), View.OnClickListener {
             when (id) {
                 R.id.nav_freeze -> {
                     val intent = Intent(Intent.ACTION_VIEW)
-                    intent.setClassName("com.omarea.vtools", "com.omarea.vtools.activities.ActivityFreezeApps2")
+                    intent.setClassName(context.packageName, "com.omarea.vtools.activities.ActivityFreezeApps2")
                     startActivity(intent)
                     return
                 }
@@ -290,18 +290,18 @@ class FragmentNav : Fragment(), View.OnClickListener {
                 }
                 R.id.nav_xposed_global -> {
                     xposedCheck {
-                        DialogXposedGlobalConfig(activity!!).show()
+                        DialogXposedGlobalConfig(requireActivity()).show()
                     }
                     return
                 }
-                R.id.nav_gesture -> {
-                    tryOpenApp("com.omarea.gesture")
-                    return
-                }
-                R.id.nav_filter -> {
-                    tryOpenApp("com.omarea.filter")
-                    return
-                }
+//                R.id.nav_gesture -> {
+//                    tryOpenApp("com.omarea.gesture")
+//                    return
+//                }
+//                R.id.nav_filter -> {
+//                    tryOpenApp("com.omarea.filter")
+//                    return
+//                }
                 R.id.nav_processes -> {
                     val intent = Intent(context, ActivityProcess::class.java)
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -309,7 +309,7 @@ class FragmentNav : Fragment(), View.OnClickListener {
                     return
                 }
                 R.id.nav_fps_chart -> {
-                    val serviceState = AccessibleServiceHelper().serviceRunning(context!!)
+                    val serviceState = AccessibleServiceHelper().serviceRunning(requireContext())
                     if (serviceState) {
                         val intent = Intent(context, ActivityFpsChart::class.java)
                         startActivity(intent)
@@ -324,8 +324,8 @@ class FragmentNav : Fragment(), View.OnClickListener {
                     return
                 }
                 R.id.nav_additional_all -> {
-                    val krScriptConfig = KrScriptConfig().init(context!!)
-                    val activity = activity!!
+                    val krScriptConfig = KrScriptConfig().init(requireContext())
+                    val activity = requireActivity()
                     krScriptConfig.pageListConfig?.run {
                         OpenPageHelper(activity).openPage(this.apply {
                             title = getString(R.string.menu_additional)
@@ -340,7 +340,7 @@ class FragmentNav : Fragment(), View.OnClickListener {
     }
 
     private fun installVAddin() {
-        DialogHelper.warning(context!!, getString(R.string.scene_addin_miss), getString(R.string.scene_addin_miss_desc), {
+        DialogHelper.warning(requireContext(), getString(R.string.scene_addin_miss), getString(R.string.scene_addin_miss_desc), {
             try {
                 val uri = Uri.parse("http://vtools.omarea.com/")
                 val intent = Intent(Intent.ACTION_VIEW, uri)
@@ -354,7 +354,7 @@ class FragmentNav : Fragment(), View.OnClickListener {
     private fun xposedCheck(onPass: Runnable) {
         var vAddinsInstalled: Boolean
         try {
-            vAddinsInstalled = context!!.packageManager.getPackageInfo("com.omarea.vaddin", 0) != null
+            vAddinsInstalled = requireContext().packageManager.getPackageInfo("com.omarea.vaddin", 0) != null
         } catch (ex: Exception) {
             vAddinsInstalled = false
         }

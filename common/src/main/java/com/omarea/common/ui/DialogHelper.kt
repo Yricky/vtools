@@ -96,7 +96,7 @@ class DialogHelper {
             val alert = AlertDialog.Builder(context).setView(dialog)
             alert.setCancelable(true)
 
-            (dialog.findViewById(R.id.dialog_help_title) as TextView).run {
+            dialog.findViewById<TextView>(R.id.dialog_help_title)?.run {
                 if (title.isNotEmpty()) {
                     text = title
                     visibility = View.VISIBLE
@@ -105,7 +105,7 @@ class DialogHelper {
                 }
             }
 
-            (dialog.findViewById(R.id.dialog_help_info) as TextView).run {
+            dialog.findViewById<TextView>(R.id.dialog_help_info)?.run {
                 if (message.isNotEmpty()) {
                     text = message
                     visibility = View.VISIBLE

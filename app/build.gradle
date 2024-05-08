@@ -3,7 +3,7 @@ apply plugin: 'kotlin-android'
 
 android {
     viewBinding {
-        enabled =true
+        enabled = true
     }
     signingConfigs {
         omarea_Signing {
@@ -18,7 +18,7 @@ android {
         resConfigs 'zh'
         applicationId "com.omarea.vtools"
         minSdkVersion 23
-        targetSdkVersion 30
+        targetSdkVersion 33
         versionCode 202111131
         versionName "4.7.3"
         externalNativeBuild {
@@ -82,6 +82,7 @@ android {
     kotlinOptions {
         jvmTarget = '17'
     }
+    buildToolsVersion '34.0.0'
 }
 
 dependencies {
