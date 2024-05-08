@@ -151,6 +151,9 @@ class FragmentHome : androidx.fragment.app.Fragment() {
         }
 
         binding.homeDeviceName.text = when (Build.VERSION.SDK_INT) {
+            34 -> "Android 14"
+            33 -> "Android 13"
+            32 -> "Android 12L"
             31 -> "Android 12"
             30 -> "Android 11"
             29 -> "Android 10"
@@ -162,8 +165,8 @@ class FragmentHome : androidx.fragment.app.Fragment() {
             23 -> "Android 6.0"
             22 -> "Android 5.1"
             21 -> "Android 5.0"
-            else -> "SDK(" + Build.VERSION.SDK_INT + ")"
-        } // (Build.MANUFACTURER + " " + Build.MODEL + " (SDK" + Build.VERSION.SDK_INT + ")").trim()
+            else -> ""
+        }.let { "$it (${Build.VERSION.SDK_INT})".trim() }
     }
 
     @SuppressLint("SetTextI18n")

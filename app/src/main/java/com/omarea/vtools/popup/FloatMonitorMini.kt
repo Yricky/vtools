@@ -17,19 +17,19 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
 import android.view.WindowManager.LayoutParams
-import android.widget.TextView
 import android.widget.Toast
 import com.omarea.Scene
 import com.omarea.data.GlobalStatus
 import com.omarea.library.shell.*
 import com.omarea.store.SpfConfig
 import com.omarea.vtools.R
+import com.omarea.vtools.databinding.FwMonitorMiniBinding
 import java.util.*
 
-public class FloatMonitorMini(private val mContext: Context) {
+class FloatMonitorMini(private val mContext: Context) {
     private var startMonitorTime = 0L
     private var cpuLoadUtils = CpuLoadUtils()
-    private var CpuFrequencyUtil = CpuFrequencyUtils()
+    private var cpuFrequencyUtils = CpuFrequencyUtils()
 
     private val globalSPF = mContext.getSharedPreferences(SpfConfig.GLOBAL_SPF, Context.MODE_PRIVATE)
 
@@ -38,7 +38,7 @@ public class FloatMonitorMini(private val mContext: Context) {
      * @param context
      */
     fun showPopupWindow(): Boolean {
-        if (show!!) {
+        if (show) {
             return true
         }
         startMonitorTime = System.currentTimeMillis()
@@ -46,8 +46,8 @@ public class FloatMonitorMini(private val mContext: Context) {
             batteryManager = mContext.getSystemService(Context.BATTERY_SERVICE) as BatteryManager
         }
 
-        if (!(mContext is AccessibilityService)) {
-            if (Build.VERSION.SDK_INT >= 23 && !Settings.canDrawOverlays(mContext)) {
+        if (mContext !is AccessibilityService) {
+            if (!Settings.canDrawOverlays(mContext)) {
                 Toast.makeText(mContext, mContext.getString(R.string.permission_float), Toast.LENGTH_LONG).show()
                 return false
             }
@@ -82,7 +82,7 @@ public class FloatMonitorMini(private val mContext: Context) {
         params.x = monitorStorage.getInt("x", 0)
         params.y = monitorStorage.getInt("y", 0)
 
-        params.flags = LayoutParams.FLAG_NOT_TOUCH_MODAL or LayoutParams.FLAG_NOT_FOCUSABLE or LayoutParams.FLAG_NOT_TOUCHABLE or LayoutParams.FLAG_FULLSCREEN
+        params.flags = LayoutParams.FLAG_NOT_TOUCH_MODAL or LayoutParams.FLAG_NOT_FOCUSABLE or LayoutParams.FLAG_NOT_TOUCHABLE or LayoutParams.FLAG_LAYOUT_IN_SCREEN
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             params.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
@@ -116,13 +116,7 @@ public class FloatMonitorMini(private val mContext: Context) {
         }
     }
 
-    private var view: View? = null
-    private var cpuLoadTextView: TextView? = null
-    private var gpuLoadTextView: TextView? = null
-    private var gpuPanel: View? = null
-    private var temperaturePanel: View? = null
-    private var temperatureText: TextView? = null
-    private var fpsText: TextView? = null
+    private var binding:FwMonitorMiniBinding? = null
 
     private var activityManager: ActivityManager? = null
     private var myHandler = Handler(Looper.getMainLooper())
@@ -140,8 +134,8 @@ public class FloatMonitorMini(private val mContext: Context) {
         pollingPhase %= 4
 
         if (coreCount < 1) {
-            coreCount = CpuFrequencyUtil.coreCount
-            clusters = CpuFrequencyUtil.clusterInfo
+            coreCount = cpuFrequencyUtils.coreCount
+            clusters = cpuFrequencyUtils.clusterInfo
         }
         val gpuLoad = GpuUtils.getGpuLoad()
 
@@ -199,16 +193,16 @@ public class FloatMonitorMini(private val mContext: Context) {
         }
 
         myHandler.post {
-            cpuLoadTextView?.text = cpuLoad.toInt().toString() + "%"
+            binding?.fwCpuLoad?.text = cpuLoad.toInt().toString() + "%"
             if (gpuLoad > -1) {
-                gpuLoadTextView?.text = gpuLoad.toString() + "%"
+                binding?.fwGpuLoad?.text = gpuLoad.toString() + "%"
             } else {
-                gpuLoadTextView?.text = "--"
+                binding?.fwGpuLoad?.text = "--"
             }
 
-            temperatureText!!.setText(batState!!)
+            binding?.fwBatteryTemp?.setText(batState!!)
             if (fps != null) {
-                fpsText?.text = fps.toString()
+                binding?.fwFps?.text = fps.toString()
             }
         }
     }
@@ -239,23 +233,16 @@ public class FloatMonitorMini(private val mContext: Context) {
 
     @SuppressLint("ApplySharedPref", "ClickableViewAccessibility")
     private fun setUpView(context: Context): View {
-        view = LayoutInflater.from(context).inflate(R.layout.fw_monitor_mini, null)
-        gpuPanel = view!!.findViewById(R.id.fw_gpu)
-        temperaturePanel = view!!.findViewById(R.id.fw_battery)
-
-        cpuLoadTextView = view!!.findViewById(R.id.fw_cpu_load)
-        gpuLoadTextView = view!!.findViewById(R.id.fw_gpu_load)
-        temperatureText = view!!.findViewById(R.id.fw_battery_temp)
-        fpsText = view!!.findViewById(R.id.fw_fps)
+        binding = FwMonitorMiniBinding.inflate(LayoutInflater.from(context))
 
         activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
 
-        return view!!
+        return binding?.root!!
     }
 
     companion object {
         private var mWindowManager: WindowManager? = null
-        public var show: Boolean? = false
+        public var show: Boolean = false
 
         @SuppressLint("StaticFieldLeak")
         private var mView: View? = null

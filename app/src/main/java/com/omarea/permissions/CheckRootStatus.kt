@@ -139,41 +139,27 @@ public class CheckRootStatus(var context: Context, private val next: Runnable? =
                         cmds.append("appops set --uid ${context.packageName} MANAGE_EXTERNAL_STORAGE allow\n")
                     }
                 } else if (it == Manifest.permission.SYSTEM_ALERT_WINDOW) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        if (!Settings.canDrawOverlays(context)) {
-                            // 未允许悬浮窗
-                            try {
-                                //启动Activity让用户授权
-                                // Toast.makeText(context, "Scene未获得显示悬浮窗权限", Toast.LENGTH_SHORT).show()
-                                // val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.getPackageName()));
-                                // context.startActivity(intent);
-                            } catch (ex: Exception) {
-                            }
-                        }
-                    } else {
-                        if (!checkPermission(context, it)) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                val option = it.substring("android.permission.".length)
-                                cmds.append("appops set ${context.packageName} ${option} allow\n")
-                            }
-                            cmds.append("pm grant ${context.packageName} $it\n")
+                    if (!Settings.canDrawOverlays(context)) {
+                        // 未允许悬浮窗
+                        try {
+                            //启动Activity让用户授权
+                            // Toast.makeText(context, "Scene未获得显示悬浮窗权限", Toast.LENGTH_SHORT).show()
+                            // val intent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + context.getPackageName()));
+                            // context.startActivity(intent);
+                        } catch (ex: Exception) {
                         }
                     }
                 } else {
                     if (!checkPermission(context, it)) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                            val option = it.substring("android.permission.".length)
-                            cmds.append("appops set ${context.packageName} ${option} allow\n")
-                        }
+                        val option = it.substring("android.permission.".length)
+                        cmds.append("appops set ${context.packageName} ${option} allow\n")
                         cmds.append("pm grant ${context.packageName} $it\n")
                     }
                 }
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (!checkPermission(context, Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)) {
-                    cmds.append("dumpsys deviceidle whitelist +${context.packageName};\n")
-                }
+            if (!checkPermission(context, Manifest.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS)) {
+                cmds.append("dumpsys deviceidle whitelist +${context.packageName};\n")
             }
 
             /*
