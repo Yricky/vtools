@@ -124,6 +124,7 @@
             android:configChanges="keyboardHidden|orientation|uiMode"
             android:label="@string/app_name"
             android:launchMode="singleTop"
+            android:exported="true"
             android:screenOrientation="behind">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -177,6 +178,7 @@
             android:configChanges="keyboardHidden|orientation|uiMode"
             android:excludeFromRecents="true"
             android:screenOrientation="behind"
+            android:exported="true"
             android:label="应用场景">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -188,6 +190,7 @@
             android:name=".activities.ActivityFileSelector"
             android:configChanges="keyboardHidden|orientation|uiMode"
             android:excludeFromRecents="true"
+            android:exported="true"
             android:label="@string/title_activity_file_selector"
             android:screenOrientation="behind"
             android:launchMode="standard">
@@ -202,6 +205,7 @@
             android:configChanges="keyboardHidden|orientation|uiMode"
             android:label="@string/title_activity_timing_task"
             android:screenOrientation="behind"
+            android:exported="true"
             android:launchMode="standard">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -212,6 +216,7 @@
         <activity
             android:name=".activities.ActivityTrigger"
             android:configChanges="keyboardHidden|orientation|uiMode"
+            android:exported="true"
             android:label="@string/title_activity_trigger"
             android:screenOrientation="behind"
             android:launchMode="standard">
@@ -225,6 +230,7 @@
             android:name=".activities.ActivityQuickStart"
             android:configChanges="keyboardHidden|orientation|uiMode"
             android:excludeFromRecents="true"
+            android:exported="true"
             android:label="@string/title_activity_shortcut"
             android:screenOrientation="behind"
             android:theme="@style/AppThemeTransparent">
@@ -238,6 +244,7 @@
             android:name=".activities.ActivityFreezeApps"
             android:configChanges="keyboardHidden|orientation|uiMode"
             android:enabled="false"
+            android:exported="true"
             android:noHistory="true"
             android:multiprocess="false"
             android:excludeFromRecents="true"
@@ -266,6 +273,7 @@
         <activity
             android:name=".activities.ActionPage"
             android:configChanges="keyboardHidden|orientation|uiMode|layoutDirection|screenLayout|colorMode|fontScale|smallestScreenSize|density|keyboard|screenSize|touchscreen"
+            android:exported="true"
             android:screenOrientation="behind">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -276,6 +284,7 @@
         <activity
             android:name=".activities.ActionPageOnline"
             android:configChanges="keyboardHidden|orientation|uiMode|layoutDirection|screenLayout|colorMode|fontScale|smallestScreenSize|density|keyboard|screenSize|touchscreen"
+            android:exported="true"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -325,6 +334,7 @@
 
         <service
             android:name=".AccessibilityScenceMode"
+            android:exported="true"
             android:label="Scene - 场景模式"
             android:configChanges="orientation|screenLayout|fontScale|smallestScreenSize|density|screenSize"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
@@ -341,6 +351,7 @@
         </service>
         <service
             android:name="com.omarea.scene_mode.NotificationListenerService"
+            android:exported="true"
             android:label="通知过滤服务"
             android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
             <intent-filter>
@@ -357,6 +368,7 @@
             android:permission="" />
         <service
             android:name="com.omarea.scene_mode.SceneTileService"
+            android:exported="true"
             android:icon="@drawable/p4"
             android:label="@string/app_name"
             android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">

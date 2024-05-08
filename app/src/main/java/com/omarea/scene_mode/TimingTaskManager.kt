@@ -20,7 +20,7 @@ public class TimingTaskManager(private var context: Context) {
         taskIntent.putExtra("taskId", taskId)
         taskIntent.action = taskId
         taskIntent.setAction(taskId)
-        val pendingIntent = PendingIntent.getService(context, 0, taskIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val pendingIntent = PendingIntent.getService(context, 0, taskIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         return pendingIntent
     }
 

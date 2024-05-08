@@ -2,8 +2,9 @@ package com.omarea.common.ui;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.widget.ListView;
 
-public class OverScrollListView extends com.mixiaoxiao.overscroll.OverScrollListView {
+public class OverScrollListView extends ListView {
     public OverScrollListView(Context context) {
         super(context);
     }

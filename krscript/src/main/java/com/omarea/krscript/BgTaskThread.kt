@@ -39,7 +39,7 @@ class BgTaskThread(private var process: Process) : Thread() {
         private var STOP_CLICK_ACTION_NAME = context.packageName + ".TaskStop." + "N" + notificationID
         private val stopIntent = PendingIntent.getBroadcast(context, 0, Intent(STOP_CLICK_ACTION_NAME).apply {
             putExtra("id", notificationID)
-        }, PendingIntent.FLAG_UPDATE_CURRENT)
+        }, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         private val receiver = object : BroadcastReceiver() {
             override fun onReceive(context: Context?, intent: Intent?) {
                 if (intent != null && intent.hasExtra("id")) {
@@ -84,14 +84,14 @@ class BgTaskThread(private var process: Process) : Thread() {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 if (!channelCreated) {
-                    val channel = NotificationChannel(channelId, context.getString(R.string.kr_script_task_notification), NotificationManager.IMPORTANCE_DEFAULT)
+                    val channel = NotificationChannel(CHANNEL_ID, context.getString(R.string.kr_script_task_notification), NotificationManager.IMPORTANCE_DEFAULT)
                     channel.enableLights(false)
                     channel.enableVibration(false)
                     channel.setSound(null, null)
                     notificationManager.createNotificationChannel(channel)
                 }
                 channelCreated = true
-                notificationBuilder.setChannelId(channelId)
+                notificationBuilder.setChannelId(CHANNEL_ID)
             } else {
                 notificationBuilder.setSound(null)
                 notificationBuilder.setVibrate(null)
@@ -104,7 +104,7 @@ class BgTaskThread(private var process: Process) : Thread() {
             }
 
             if (!isFinished) {
-                notification!!.flags = Notification.FLAG_NO_CLEAR or Notification.FLAG_ONGOING_EVENT
+                notification.flags = Notification.FLAG_NO_CLEAR or Notification.FLAG_ONGOING_EVENT
             }
 
             notificationManager.notify(notificationID, notification); // 发送通知
@@ -168,7 +168,7 @@ class BgTaskThread(private var process: Process) : Thread() {
 
     companion object {
         private var channelCreated = false
-        private val channelId = "kr_script_task_notification"
+        private const val CHANNEL_ID = "kr_script_task_notification"
         private var notificationCounter = 34050
 
         fun startTask(context: Context, script: String, params: HashMap<String, String>?, nodeInfo: RunnableNode, onExit: Runnable, onDismiss: Runnable) {
