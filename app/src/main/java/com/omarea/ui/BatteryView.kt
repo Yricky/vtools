@@ -144,18 +144,6 @@ class BatteryView : View {
         labelPaint!!.strokeWidth = 20f
     }
 
-    fun cgangePer(per: Int) {
-        val perOld = this.ratioState
-        val va = ValueAnimator.ofInt(perOld, per)
-        va.duration = 200
-        va.interpolator = DecelerateInterpolator()
-        va.addUpdateListener { animation ->
-            ratioState = animation.animatedValue as Int
-            invalidate()
-        }
-        va.start()
-
-    }
 
     /**
      * 画圆环
